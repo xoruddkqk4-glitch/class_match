@@ -115,75 +115,47 @@
       to { transform: rotate(360deg); }
     }
 
-    /* 테이블 열 별 필터 헤더 (21-홍익_보강 지원 프로젝트 표준) */
-    .filter-header-row th {
-      background-color: #f8fafc;
-      padding: 6px 5px;
-      border: 1px solid #cbd5e1;
-      color: var(--text-main) !important;
-      vertical-align: middle;
+    /* 웹앱 상단 기능 안내 메세지 배너 */
+    .notice-banner {
+      background: #f0fdfa;
+      border: 1.5px solid var(--primary-border);
+      border-radius: var(--radius);
+      padding: 9px 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 1px 3px rgba(0, 107, 103, 0.08);
+    }
+    .notice-banner .notice-icon {
+      color: var(--primary-color);
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .notice-banner .notice-content {
+      font-size: 0.85rem;
+      color: #00524f;
+      font-weight: 600;
+      line-height: 1.45;
+      flex: 1;
     }
 
-    .col-filter-input, .col-filter-select {
-      width: 100%;
-      padding: 5px 6px;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      outline: none;
-      background: #ffffff;
-      color: var(--text-main);
-      transition: all 0.2s ease;
-      font-weight: 500;
-    }
-
-    .col-filter-input:focus, .col-filter-select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 2px rgba(0, 107, 103, 0.15);
-      background-color: #ffffff;
-    }
-
-    .btn-reset-filters {
-      padding: 4px 8px;
-      font-size: 0.775rem;
-      font-weight: 700;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      background: #ffffff;
-      color: #334155;
+    /* 학급 열 정렬 헤더 인터액션 스타일 */
+    .th-sortable {
       cursor: pointer;
+      user-select: none;
+      transition: background-color 0.15s ease;
+    }
+    .th-sortable:hover {
+      background-color: #005652 !important;
+    }
+    .sort-icon-wrap {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 4px;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-      width: 100%;
-    }
-
-    .btn-reset-filters:hover {
-      background: #f1f5f9;
-      border-color: #94a3b8;
-      color: var(--primary-color);
-    }
-
-    .animate-spin-ccw {
-      animation: spin-ccw 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @keyframes spin-ccw {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(-360deg); }
-    }
-
-    .btn-clicked-pulse {
-      animation: buttonPulse 0.35s ease;
-    }
-
-    @keyframes buttonPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(0.92); }
-      100% { transform: scale(1); }
+      margin-left: 5px;
+      font-size: 0.85rem;
     }
 
     /* 테이블 카드 및 툴바 */
@@ -325,6 +297,52 @@
       font-weight: 700;
     }
 
+    /* 통일된 아이콘 액션 버튼 (수정 & 삭제) */
+    .btn-icon-action {
+      width: 27px;
+      height: 27px;
+      padding: 0 !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.825rem;
+      transition: all 0.15s ease;
+      line-height: 1;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      outline: none;
+      flex-shrink: 0;
+    }
+
+    /* 수정 버튼 (스카이블루 테두리 + 연블루 배경 + 파란 연필 아이콘) */
+    .btn-icon-edit {
+      background-color: #f0f7ff !important;
+      border: 1.2px solid #bfdbfe !important;
+      color: #2563eb !important;
+    }
+    .btn-icon-edit:hover {
+      background-color: #dbeafe !important;
+      border-color: #93c5fd !important;
+      color: #1d4ed8 !important;
+      transform: scale(1.08);
+      box-shadow: 0 2px 5px rgba(37, 99, 235, 0.15);
+    }
+
+    /* 삭제 버튼 (연분홍 테두리 + 연레드 배경 + 빨간 휴지통 아이콘) */
+    .btn-icon-delete {
+      background-color: #fff1f2 !important;
+      border: 1.2px solid #fecaca !important;
+      color: #ef4444 !important;
+    }
+    .btn-icon-delete:hover {
+      background-color: #fee2e2 !important;
+      border-color: #fca5a5 !important;
+      color: #dc2626 !important;
+      transform: scale(1.08);
+      box-shadow: 0 2px 5px rgba(239, 68, 68, 0.15);
+    }
+
     /* 테이블 스타일 (학급당 1행 표시) */
     .table-responsive {
       width: 100%;
@@ -384,6 +402,55 @@
       padding: 2px 8px;
       border-radius: 12px;
       white-space: nowrap;
+    }
+
+    /* 총 희망 차수 인라인 스텝퍼 (+/- 버튼) 스타일 */
+    .hours-stepper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      vertical-align: middle;
+    }
+
+    .btn-step {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid #70b8b2;
+      background: #ffffff;
+      color: var(--primary-color);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      outline: none;
+    }
+
+    .btn-step:hover:not(:disabled) {
+      background: var(--primary-color);
+      color: #ffffff;
+      border-color: var(--primary-color);
+      transform: scale(1.1);
+    }
+
+    .btn-step:active:not(:disabled) {
+      transform: scale(0.92);
+    }
+
+    .btn-step:disabled {
+      opacity: 0.32;
+      cursor: not-allowed;
+      border-color: #cbd5e1;
+      color: #94a3b8;
+      background: #f8fafc;
+      transform: none;
     }
 
     .badge-ext {
@@ -450,6 +517,78 @@
       padding: 1px 6px;
       font-size: 0.75rem;
       font-weight: 600;
+    }
+
+    /* 미니 스케줄 매트릭스 (7행 x 5열: 열=월화수목금, 행=1~7교시) */
+    .mini-matrix {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 1.5px;
+      background: #ffffff;
+      border: 1px solid var(--primary-border);
+      border-radius: 6px;
+      padding: 4px 6px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      user-select: none;
+      vertical-align: middle;
+      text-align: left;
+    }
+
+    .mm-head, .mm-row {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .mm-lbl {
+      width: 14px;
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .mm-col-hdr {
+      width: 16px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .mm-col-hdr.active-day {
+      color: var(--primary-color);
+      font-weight: 800;
+    }
+
+    .mm-cell {
+      width: 16px;
+      height: 13px;
+      line-height: 13px;
+      border-radius: 2px;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-align: center;
+      color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .mm-cell.active {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 1px 2px rgba(0, 107, 103, 0.25);
+      cursor: default;
+    }
+
+    .mm-cell.active:hover {
+      background-color: var(--primary-hover);
+      transform: scale(1.2);
     }
 
     /* 폼 카드 및 다중 학급 선택 */
@@ -521,7 +660,7 @@
     }
 
     .form-textarea {
-      min-height: 70px;
+      min-height: 55px;
       resize: vertical;
     }
 
@@ -685,6 +824,7 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
+      overflow-y: auto;
     }
     .modal-overlay.show { display: flex; }
 
@@ -697,13 +837,21 @@
       overflow: hidden;
       animation: modalSlide 0.2s ease;
       border: 1px solid var(--primary-border);
-      max-height: 90vh;
+      max-height: calc(100vh - 36px);
       display: flex;
       flex-direction: column;
     }
     @keyframes modalSlide {
       from { opacity: 0; transform: scale(0.97); }
       to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-dialog form {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .modal-head {
@@ -738,6 +886,17 @@
       flex-direction: column;
       gap: 12px;
       overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary-border) transparent;
+    }
+    .modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+      background-color: var(--primary-border);
+      border-radius: 3px;
     }
 
     .modal-footer {
@@ -833,6 +992,14 @@
       </h1>
     </header>
 
+    <!-- 웹앱 기능 안내 메세지 배너 -->
+    <div class="notice-banner" id="noticeBanner">
+      <div class="notice-icon"><i class="fa-solid fa-circle-info"></i></div>
+      <div class="notice-content" id="noticeBannerText">
+        시험 기간 전 특정 학급의 보강이 필요한 선생님이 가능 시간을 등록하고, 수업을 빌려주실 수 있는 동료 선생님과 서로 연결하여 보강을 조율하는 도구입니다.
+      </div>
+    </div>
+
     <!-- MAIN TABLE CARD (학급마다 하나의 행으로 표시) -->
     <main class="table-card">
       <div class="table-header-title">
@@ -847,8 +1014,8 @@
           <button type="button" class="btn btn-primary btn-sm" onclick="openModal('modalCreateRequest')">
             <i class="fa-solid fa-plus"></i> 보강 희망 등록
           </button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="openModal('modalSettings')" title="스프레드시트 설정">
-            <i class="fa-solid fa-gear"></i> 시트 설정
+          <button type="button" class="btn btn-outline btn-sm" onclick="openNoticeModal()" title="상단 안내 메세지 수정">
+            <i class="fa-solid fa-bullhorn"></i> 안내 메세지 수정
           </button>
           <button type="button" class="btn btn-outline btn-sm" onclick="fetchData(true)" title="데이터 새로고침">
             <i class="fa-solid fa-arrows-rotate" id="tableRefreshIcon"></i>
@@ -860,81 +1027,16 @@
         <table class="schedule-table">
           <thead>
             <tr>
-              <th style="width: 80px;">상태</th>
-              <th style="width: 105px;">희망 학급</th>
-              <th style="width: 90px;">교과명</th>
-              <th style="width: 85px;">희망 교사</th>
-              <th style="width: 95px;">내선번호</th>
-              <th style="width: 90px;">총 희망 차수</th>
-              <th>가능 요일 및 각 요일별 가능 교시</th>
-              <th style="width: 130px;">매칭 정보</th>
-              <th>비고 / 메모</th>
+              <th style="width: 120px;" class="th-sortable" onclick="toggleSortByClass()" title="클릭하여 희망 학급 오름차순/내림차순 정렬">
+                희망 학급 <span class="sort-icon-wrap" id="classSortIcon"><i class="fa-solid fa-arrow-down-short-wide" style="color: #fde047;"></i></span>
+              </th>
+              <th style="width: 100px;">교과명</th>
+              <th style="width: 95px;">희망 교사</th>
+              <th style="width: 100px;">내선번호</th>
+              <th style="width: 110px;">총 희망 차수</th>
+              <th style="width: 210px;">보강 가능한 요일과 교시</th>
+              <th style="width: 210px;">비고 / 메모</th>
               <th style="width: 165px;">관리 / 작업</th>
-            </tr>
-            <!-- 열 별 필터 검색 행 (21-홍익_보강 지원 프로젝트 표준) -->
-            <tr class="filter-header-row">
-              <th>
-                <select class="col-filter-select" id="filterColStatus" onchange="applyColumnFilters()">
-                  <option value="">전체 상태</option>
-                  <option value="OPEN">대기중</option>
-                  <option value="MATCHED">매칭완료</option>
-                </select>
-              </th>
-              <th>
-                <select class="col-filter-select" id="filterColClass" onchange="applyColumnFilters()">
-                  <option value="">전체 학급</option>
-                  <optgroup label="1학년">
-                    <option value="1학년">1학년 전체</option>
-                    <option value="1학년 1반">1학년 1반</option><option value="1학년 2반">1학년 2반</option><option value="1학년 3반">1학년 3반</option><option value="1학년 4반">1학년 4반</option><option value="1학년 5반">1학년 5반</option><option value="1학년 6반">1학년 6반</option><option value="1학년 7반">1학년 7반</option><option value="1학년 8반">1학년 8반</option><option value="1학년 9반">1학년 9반</option><option value="1학년 10반">1학년 10반</option><option value="1학년 11반">1학년 11반</option><option value="1학년 12반">1학년 12반</option><option value="1학년 13반">1학년 13반</option><option value="1학년 14반">1학년 14반</option><option value="1학년 15반">1학년 15반</option>
-                  </optgroup>
-                  <optgroup label="2학년">
-                    <option value="2학년">2학년 전체</option>
-                    <option value="2학년 1반">2학년 1반</option><option value="2학년 2반">2학년 2반</option><option value="2학년 3반">2학년 3반</option><option value="2학년 4반">2학년 4반</option><option value="2학년 5반">2학년 5반</option><option value="2학년 6반">2학년 6반</option><option value="2학년 7반">2학년 7반</option><option value="2학년 8반">2학년 8반</option><option value="2학년 9반">2학년 9반</option><option value="2학년 10반">2학년 10반</option><option value="2학년 11반">2학년 11반</option><option value="2학년 12반">2학년 12반</option><option value="2학년 13반">2학년 13반</option><option value="2학년 14반">2학년 14반</option><option value="2학년 15반">2학년 15반</option>
-                  </optgroup>
-                  <optgroup label="3학년">
-                    <option value="3학년">3학년 전체</option>
-                    <option value="3학년 1반">3학년 1반</option><option value="3학년 2반">3학년 2반</option><option value="3학년 3반">3학년 3반</option><option value="3학년 4반">3학년 4반</option><option value="3학년 5반">3학년 5반</option><option value="3학년 6반">3학년 6반</option><option value="3학년 7반">3학년 7반</option><option value="3학년 8반">3학년 8반</option><option value="3학년 9반">3학년 9반</option><option value="3학년 10반">3학년 10반</option><option value="3학년 11반">3학년 11반</option><option value="3학년 12반">3학년 12반</option><option value="3학년 13반">3학년 13반</option><option value="3학년 14반">3학년 14반</option><option value="3학년 15반">3학년 15반</option>
-                  </optgroup>
-                </select>
-              </th>
-              <th>
-                <input type="text" class="col-filter-input" id="filterColSubject" placeholder="교과 검색..." onkeyup="applyColumnFilters()">
-              </th>
-              <th>
-                <input type="text" class="col-filter-input" id="filterColTeacher" placeholder="교사 검색..." onkeyup="applyColumnFilters()">
-              </th>
-              <th>
-                <input type="text" class="col-filter-input" id="filterColExt" placeholder="내선 검색..." onkeyup="applyColumnFilters()">
-              </th>
-              <th>
-                <select class="col-filter-select" id="filterColTotalHours" onchange="applyColumnFilters()">
-                  <option value="">전체 차시</option>
-                  <option value="1">1차시</option>
-                  <option value="2">2차시</option>
-                  <option value="3">3차시</option>
-                  <option value="4">4차시</option>
-                  <option value="5">5차시</option>
-                  <option value="6">6차시</option>
-                  <option value="7">7차시</option>
-                  <option value="8">8차시</option>
-                  <option value="9">9차시</option>
-                  <option value="10">10차시</option>
-                </select>
-              </th>
-              <th>
-                <input type="text" class="col-filter-input" id="filterColSchedule" placeholder="요일/교시 검색..." onkeyup="applyColumnFilters()">
-              </th>
-              <th>
-                <input type="text" class="col-filter-input" id="filterColMatched" placeholder="매칭 교사 검색..." onkeyup="applyColumnFilters()">
-              </th>
-              <th>
-                <input type="text" class="col-filter-input" id="filterColNotes" placeholder="메모 검색..." onkeyup="applyColumnFilters()">
-              </th>
-              <th>
-                <button type="button" class="btn-reset-filters" id="btnResetFilters" onclick="resetColumnFilters(event)" title="열 필터 초기화">
-                  <i id="resetIcon" class="fa-solid fa-rotate-left"></i> 초기화
-                </button>
-              </th>
             </tr>
           </thead>
           <tbody id="tableBody">
@@ -1120,44 +1222,36 @@
     </div>
   </div>
 
-  <!-- MODAL: 스프레드시트 설정 모달 -->
-  <div id="modalSettings" class="modal-overlay">
-    <div class="modal-dialog" style="max-width: 640px;">
+  <!-- MODAL: 안내 메세지 수정 모달 -->
+  <div id="modalNotice" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 600px;">
       <div class="modal-head">
-        <h3><i class="fa-solid fa-database"></i> 스프레드시트 연동 설정</h3>
-        <button class="modal-close-btn" onclick="closeModal('modalSettings')">&times;</button>
+        <h3><i class="fa-solid fa-bullhorn"></i> 안내 메세지 수정</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalNotice')">&times;</button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">현재 연결된 스프레드시트 링크</label>
-          <div style="display: flex; gap: 6px;">
-            <input type="text" id="settingSheetUrl" class="form-input" readonly style="background: #f1f5f9; flex: 1;">
-            <a id="btnOpenSheet" href="#" target="_blank" class="btn btn-outline">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i> 시트 열기
-            </a>
+      <form id="noticeForm" onsubmit="handleSaveNotice(event)">
+        <div class="modal-body">
+          <p style="font-size: 0.825rem; color: var(--text-muted);">
+            웹앱 상단에 표시되는 기능 안내 메세지를 수정합니다. 모든 선생님에게 실시간으로 공유됩니다.
+          </p>
+          <div class="form-group">
+            <label class="form-label">안내 메세지 내용 <span class="req">*</span></label>
+            <textarea id="inputNoticeMessage" class="form-textarea" style="min-height: 85px;" required placeholder="웹앱 기능 및 사용 안내 메세지를 입력하세요..."></textarea>
           </div>
         </div>
-
-        <div class="form-group">
-          <label class="form-label">스프레드시트 ID 또는 URL 직접 변경</label>
-          <div style="display: flex; gap: 6px;">
-            <input type="text" id="settingNewSheetId" class="form-input" placeholder="구글 시트 ID 또는 전체 URL 입력..." style="flex: 1;">
-            <button type="button" class="btn btn-primary" onclick="handleUpdateSheetId()">연결 변경</button>
-          </div>
-          <span style="font-size: 0.775rem; color: var(--text-muted);">
-            새로운 구글 스프레드시트 URL 또는 ID를 입력하여 연결을 전환할 수 있습니다.
-          </span>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalNotice')">취소</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i> 안내 메세지 저장
+          </button>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline" onclick="closeModal('modalSettings')">닫기</button>
-      </div>
+      </form>
     </div>
   </div>
 
   <!-- MODAL 1: 보강 희망 내용 수정 모달 (총 차수, 가능 요일/교시, 내선, 메모 수정) -->
   <div id="modalEditRequest" class="modal-overlay">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="max-width: 780px;">
       <div class="modal-head">
         <h3><i class="fa-solid fa-pen-to-square"></i> 보강 희망 내용 수정</h3>
         <button class="modal-close-btn" onclick="closeModal('modalEditRequest')">&times;</button>
@@ -1300,19 +1394,12 @@
             <!-- Target Summary -->
           </div>
 
-          <p style="font-size: 0.825rem; color: var(--text-muted);">
-            수업을 빌려주신 선생님과 연락이 완료되었으면 아래 정보를 확인하고 [매칭 완료 확정]을 클릭해 주세요.
+          <p style="font-size: 0.875rem; color: var(--text-main); margin-top: 14px; line-height: 1.5;">
+            동료 선생님과 수업 협의가 완료되었습니까?<br>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">
+              확인 시 매칭 완료 상태로 전환되며 테이블 목록에서 자동으로 숨김 처리됩니다.
+            </span>
           </p>
-
-          <div class="form-group">
-            <label class="form-label">수업을 빌려주신 교사명</label>
-            <input type="text" id="matchLenderName" class="form-input" placeholder="예: 이도덕 선생님">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">확정된 보강 일시 및 교시 (선택)</label>
-            <input type="text" id="matchLendDate" class="form-input" placeholder="예: 10/2(수) 2교시">
-          </div>
         </div>
 
         <div class="modal-footer">
@@ -1333,7 +1420,8 @@
     let appData = {
       requests: [],
       spreadsheetId: '',
-      spreadsheetUrl: ''
+      spreadsheetUrl: '',
+      noticeMessage: '시험 기간 전 특정 학급의 보강이 필요한 선생님이 가능 시간을 등록하고, 수업을 빌려주실 수 있는 동료 선생님과 서로 연결하여 보강을 조율하는 도구입니다.'
     };
 
     let currentStatusFilter = 'ALL';
@@ -1404,6 +1492,8 @@
     window.addEventListener('DOMContentLoaded', () => {
       renderClassToggleButtons();
       renderSelectedClasses();
+      updateSortIcon();
+      updateNoticeBanner();
       fetchData();
     });
 
@@ -1425,6 +1515,10 @@
               appData.requests = res.requests || [];
               appData.spreadsheetId = res.spreadsheetId || '';
               appData.spreadsheetUrl = res.spreadsheetUrl || '';
+              if (res.noticeMessage) {
+                appData.noticeMessage = res.noticeMessage;
+              }
+              updateNoticeBanner();
               renderTable();
               updateStats();
               if (isManual) showToast('데이터가 최신 상태로 동기화되었습니다.');
@@ -1448,6 +1542,11 @@
           } else {
             appData.requests = [...MOCK_ROWS];
           }
+          const cachedNotice = localStorage.getItem('class_match_notice');
+          if (cachedNotice) {
+            appData.noticeMessage = cachedNotice;
+          }
+          updateNoticeBanner();
           appData.spreadsheetUrl = 'https://docs.google.com/spreadsheets/d/sample-id';
           renderTable();
           updateStats();
@@ -1457,14 +1556,9 @@
     }
 
     function updateStats() {
-      const total = appData.requests.length;
+      const openCount = appData.requests.filter(r => r.status !== 'MATCHED').length;
       const badge = document.getElementById('badgeTable');
-      if (badge) badge.innerText = `${total}개 학급`;
-
-      const urlInput = document.getElementById('settingSheetUrl');
-      const openBtn = document.getElementById('btnOpenSheet');
-      if (urlInput) urlInput.value = appData.spreadsheetUrl || '생성 대기 중';
-      if (openBtn && appData.spreadsheetUrl) openBtn.href = appData.spreadsheetUrl;
+      if (badge) badge.innerText = `${openCount}개 학급 대기중`;
     }
 
     // 학급 다중 선택 버튼 UI 렌더링 (1반~15반)
@@ -1537,160 +1631,93 @@
       `).join('');
     }
 
-    // 열 별 필터 적용
-    function applyColumnFilters() {
-      renderTable();
+    // 희망 학급 정렬 상태 ('ASC': 오름차순, 'DESC': 내림차순)
+    let currentClassSort = 'ASC';
+
+    // 학년/반 파싱 정렬 헬퍼 (예: 1학년 2반 -> 102, 2학년 11반 -> 211)
+    function parseClassOrder(clsStr) {
+      if (!clsStr) return 9999;
+      const match = String(clsStr).match(/(\d+)\s*학년\s*(\d+)\s*반/);
+      if (match) {
+        return parseInt(match[1], 10) * 100 + parseInt(match[2], 10);
+      }
+      return 9999;
     }
 
-    // 열 별 필터 초기화 (21-홍익_보강 지원 프로젝트 표준)
-    function resetColumnFilters(e) {
-      const btn = (e && e.currentTarget) ? e.currentTarget : document.getElementById('btnResetFilters');
-      const resetIcon = document.getElementById('resetIcon');
-
-      if (resetIcon) {
-        resetIcon.classList.remove('animate-spin-ccw');
-        void resetIcon.offsetWidth; // Reflow 트리거
-        resetIcon.classList.add('animate-spin-ccw');
-        setTimeout(() => resetIcon.classList.remove('animate-spin-ccw'), 600);
-      }
-
-      if (btn) {
-        btn.classList.remove('btn-clicked-pulse');
-        void btn.offsetWidth; // Reflow 트리거
-        btn.classList.add('btn-clicked-pulse');
-        setTimeout(() => btn.classList.remove('btn-clicked-pulse'), 350);
-      }
-
-      const fStatus = document.getElementById('filterColStatus');
-      if (fStatus) fStatus.value = '';
-      const fClass = document.getElementById('filterColClass');
-      if (fClass) fClass.value = '';
-      const fSubject = document.getElementById('filterColSubject');
-      if (fSubject) fSubject.value = '';
-      const fTeacher = document.getElementById('filterColTeacher');
-      if (fTeacher) fTeacher.value = '';
-      const fExt = document.getElementById('filterColExt');
-      if (fExt) fExt.value = '';
-      const fTotalHours = document.getElementById('filterColTotalHours');
-      if (fTotalHours) fTotalHours.value = '';
-      const fSchedule = document.getElementById('filterColSchedule');
-      if (fSchedule) fSchedule.value = '';
-      const fMatched = document.getElementById('filterColMatched');
-      if (fMatched) fMatched.value = '';
-      const fNotes = document.getElementById('filterColNotes');
-      if (fNotes) fNotes.value = '';
-
+    // 희망 학급 열 클릭 시 오름차순/내림차순 토글 정렬
+    function toggleSortByClass() {
+      currentClassSort = (currentClassSort === 'ASC') ? 'DESC' : 'ASC';
+      updateSortIcon();
       renderTable();
-      showToast('열 검색 필터가 초기화되었습니다.', 'info');
+      showToast(`희망 학급이 ${currentClassSort === 'ASC' ? '오름차순(1반~)' : '내림차순'}으로 정렬되었습니다.`, 'info');
     }
 
-    // 테이블 렌더링 (학급마다 1행으로 표시 & 열 별 필터링 수행)
+    function updateSortIcon() {
+      const iconSpan = document.getElementById('classSortIcon');
+      if (!iconSpan) return;
+      if (currentClassSort === 'ASC') {
+        iconSpan.innerHTML = '<i class="fa-solid fa-arrow-down-short-wide" style="color: #fde047;"></i>';
+        iconSpan.title = '현재 오름차순 정렬 중 (클릭 시 내림차순)';
+      } else {
+        iconSpan.innerHTML = '<i class="fa-solid fa-arrow-down-wide-short" style="color: #fde047;"></i>';
+        iconSpan.title = '현재 내림차순 정렬 중 (클릭 시 오름차순)';
+      }
+    }
+
+    // 테이블 렌더링 (매칭 완료된 행 숨김 & 학급 오름차순/내림차순 정렬)
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       if (!tbody) return;
 
-      const fStatus = (document.getElementById('filterColStatus')?.value || '').trim();
-      const fClass = (document.getElementById('filterColClass')?.value || '').trim();
-      const fSubject = (document.getElementById('filterColSubject')?.value || '').trim().toLowerCase();
-      const fTeacher = (document.getElementById('filterColTeacher')?.value || '').trim().toLowerCase();
-      const fExt = (document.getElementById('filterColExt')?.value || '').trim();
-      const fTotalHours = (document.getElementById('filterColTotalHours')?.value || '').trim();
-      const fSchedule = (document.getElementById('filterColSchedule')?.value || '').trim().toLowerCase();
-      const fMatched = (document.getElementById('filterColMatched')?.value || '').trim().toLowerCase();
-      const fNotes = (document.getElementById('filterColNotes')?.value || '').trim().toLowerCase();
+      // 1. 매칭이 모두 완료된 경우(총 차시가 모두 매칭된 경우) 테이블에서 숨김
+      let displayRows = appData.requests.filter(row => row.status !== 'MATCHED');
 
-      const filtered = appData.requests.filter(row => {
-        // 1. 상태 필터
-        if (fStatus && row.status !== fStatus) return false;
-
-        // 2. 희망 학급 필터
-        if (fClass && !row.targetClass.includes(fClass)) return false;
-
-        // 3. 교과명 필터
-        if (fSubject && !(row.subject || '').toLowerCase().includes(fSubject)) return false;
-
-        // 4. 희망 교사 필터
-        if (fTeacher && !(row.teacherName || '').toLowerCase().includes(fTeacher)) return false;
-
-        // 5. 내선번호 필터
-        if (fExt && !(row.extensionNumber || '').includes(fExt)) return false;
-
-        // 6. 총 희망 차수 필터
-        if (fTotalHours && String(row.totalHours) !== fTotalHours) return false;
-
-        // 7. 가능 요일 및 교시 필터
-        if (fSchedule && !(row.availableSchedule || '').toLowerCase().includes(fSchedule)) return false;
-
-        // 8. 매칭 정보 필터 (대여교사 또는 대여일시)
-        if (fMatched) {
-          const matchedText = `${row.matchedTeacher || ''} ${row.matchedDate || ''}`.toLowerCase();
-          if (!matchedText.includes(fMatched)) return false;
+      // 2. 희망 학급 기준 오름차순/내림차순 정렬
+      displayRows.sort((a, b) => {
+        const orderA = parseClassOrder(a.targetClass);
+        const orderB = parseClassOrder(b.targetClass);
+        if (currentClassSort === 'ASC') {
+          return orderA - orderB;
+        } else {
+          return orderB - orderA;
         }
-
-        // 9. 비고 / 메모 필터
-        if (fNotes && !(row.notes || '').toLowerCase().includes(fNotes)) return false;
-
-        return true;
       });
 
-      // 뱃지 업데이트
+      // 3. 뱃지 업데이트 (대기 중인 보강 학급 수)
       const badge = document.getElementById('badgeTable');
-      if (badge) badge.innerText = `${filtered.length}개 학급`;
+      if (badge) badge.innerText = `${displayRows.length}개 학급 대기중`;
 
-      if (filtered.length === 0) {
+      if (displayRows.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="10" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+            <td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
               <i class="fa-solid fa-inbox" style="font-size: 1.8rem; margin-bottom: 6px; display: block; color: #cbd5e1;"></i>
-              조건에 일치하는 보강 희망 내역이 없습니다.
+              현재 대기 중인 보강 희망 학급이 없습니다. 상단의 [+ 보강 희망 등록]을 진행해 보세요.
             </td>
           </tr>
         `;
         return;
       }
 
-      tbody.innerHTML = filtered.map(row => {
-        const isOpen = row.status === 'OPEN';
-        const statusBadge = isOpen
-          ? `<span class="badge-status-open"><i class="fa-solid fa-bolt"></i> 대기중</span>`
-          : `<span class="badge-status-matched"><i class="fa-solid fa-circle-check"></i> 매칭완료</span>`;
-
-        const scheduleChips = (row.availableSchedule || '')
-          .split(/[,|]/)
-          .map(s => s.trim())
-          .filter(Boolean)
-          .map(s => `<span class="sch-chip">${escapeHtml(s)}</span>`)
-          .join('');
-
-        const matchedInfo = (!isOpen && row.matchedTeacher)
-          ? `<div style="font-weight:700; color:#047857; font-size:0.825rem;"><i class="fa-solid fa-chalkboard-user"></i> ${escapeHtml(row.matchedTeacher)} 교사</div>
-             <div style="font-size:0.75rem; color:#64748b;">${escapeHtml(row.matchedDate || '')}</div>`
-          : `<span style="color:#cbd5e1;">-</span>`;
-
-        // 버튼 액션: [수정], [매칭완료/재대기], [복사]
+      // 4. 상태 및 매칭 정보 열이 제거된 8개 컬럼 렌더링
+      tbody.innerHTML = displayRows.map(row => {
+        // 버튼 액션: [수정], [삭제], [매칭완료]
         let actionButtons = `
-          <div style="display:flex; gap:3px; justify-content:center;">
-            <button class="btn btn-outline btn-action-sm" onclick="openEditModal('${row.id}')" title="총 차수, 가능 요일/교시, 메모 수정">
-              <i class="fa-solid fa-pen-to-square" style="color: var(--primary-color);"></i> 수정
+          <div style="display:flex; gap:4px; justify-content:center; align-items:center;">
+            <button class="btn btn-icon-action btn-icon-edit" onclick="openEditModal('${row.id}')" title="보강 희망 내용 수정">
+              <i class="fa-solid fa-pen-to-square"></i>
             </button>
-            ${isOpen ? `
-              <button class="btn btn-success btn-action-sm" onclick="openConfirmMatchModal('${row.id}')" title="보강을 올렸던 교사가 클릭하여 매칭 완료를 알립니다">
-                <i class="fa-solid fa-handshake"></i> 매칭완료
-              </button>
-            ` : `
-              <button class="btn btn-outline btn-action-sm" onclick="handleCancelMatch('${row.id}')" title="매칭을 취소하고 다시 대기중으로 변경합니다" style="color:#b45309; border-color:#fde68a;">
-                <i class="fa-solid fa-rotate-left"></i> 재대기
-              </button>
-            `}
-            <button class="btn btn-outline btn-action-sm" onclick="copyMessengerText('${row.id}')" title="메신저 협의 텍스트 복사">
-              <i class="fa-regular fa-copy" style="color: var(--primary-color);"></i>
+            <button class="btn btn-icon-action btn-icon-delete" onclick="handleDeleteRequest('${row.id}')" title="보강 희망 내역 삭제">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+            <button class="btn btn-success btn-action-sm" onclick="openConfirmMatchModal('${row.id}')" title="보강을 올렸던 교사가 클릭하여 매칭 완료를 알립니다">
+              <i class="fa-solid fa-handshake"></i> 매칭완료
             </button>
           </div>
         `;
 
         return `
           <tr>
-            <td>${statusBadge}</td>
             <td><span class="badge-class">${escapeHtml(row.targetClass)}</span></td>
             <td style="font-weight: 700; color: var(--primary-color);">${escapeHtml(row.subject)}</td>
             <td style="font-weight: 600;">${escapeHtml(row.teacherName)}</td>
@@ -1699,16 +1726,117 @@
                 <i class="fa-solid fa-phone"></i> ${escapeHtml(row.extensionNumber)}
               </span>
             </td>
-            <td><span class="badge-total-hours">${row.totalHours}차시</span></td>
-            <td><div class="sch-chips-wrap">${scheduleChips || '<span style="color:#94a3b8;">협의</span>'}</div></td>
-            <td>${matchedInfo}</td>
-            <td style="font-size:0.8rem; color:var(--text-muted); text-align:left; max-width:180px; word-break:break-all;">
+            <td>
+              <div class="hours-stepper">
+                <button type="button" class="btn-step" onclick="changeTotalHours('${row.id}', -1)" title="1차시 감소" ${row.totalHours <= 1 ? 'disabled' : ''}>
+                  <i class="fa-solid fa-minus"></i>
+                </button>
+                <span class="badge-total-hours">${row.totalHours}차시</span>
+                <button type="button" class="btn-step" onclick="changeTotalHours('${row.id}', 1)" title="1차시 증가" ${row.totalHours >= 10 ? 'disabled' : ''}>
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+            </td>
+            <td style="width: 210px;">${renderMiniScheduleMatrix(row.availableSchedule)}</td>
+            <td style="width: 210px; font-size:0.8rem; color:var(--text-muted); text-align:left; word-break:break-all;">
               ${escapeHtml(row.notes || '-')}
             </td>
             <td>${actionButtons}</td>
           </tr>
         `;
       }).join('');
+    }
+
+    // 7행 x 5열 미니 스케줄 매트릭스 렌더러 (열: 월화수목금, 행: 1~7교시)
+    function renderMiniScheduleMatrix(scheduleStr) {
+      if (!scheduleStr || !scheduleStr.trim()) {
+        return '<span style="color:#94a3b8; font-size:0.8rem;">협의</span>';
+      }
+
+      const days = ['월', '화', '수', '목', '금'];
+      const dayMap = { '월': [], '화': [], '수': [], '목': [], '금': [] };
+      let matchCount = 0;
+
+      // 파싱: "월(3, 5교시) | 금(4교시)" 또는 "월(3 5교시) 금(4교시)"
+      const regex = /([월화수목금])\s*\((.*?)\)/g;
+      let m;
+      while ((m = regex.exec(scheduleStr)) !== null) {
+        const day = m[1];
+        const digits = (m[2].match(/\d+/g) || []).map(Number);
+        if (digits.length > 0) {
+          dayMap[day] = digits;
+          matchCount += digits.length;
+        }
+      }
+
+      // 파싱 가능한 교시 정보가 없으면 기본 텍스트 표시
+      if (matchCount === 0) {
+        return `<span style="font-size:0.8rem; color:var(--text-muted);">${escapeHtml(scheduleStr)}</span>`;
+      }
+
+      let html = `<div class="mini-matrix" title="${escapeHtml(scheduleStr)}">`;
+
+      // 1. 상단 헤더 행: 월, 화, 수, 목, 금
+      html += '<div class="mm-head"><span class="mm-lbl"></span>';
+      days.forEach(d => {
+        const hasAny = dayMap[d].length > 0;
+        html += `<span class="mm-col-hdr ${hasAny ? 'active-day' : ''}">${d}</span>`;
+      });
+      html += '</div>';
+
+      // 2. 7개 교시 행: 1교시부터 7교시까지
+      for (let p = 1; p <= 7; p++) {
+        html += `<div class="mm-row">`;
+        html += `<span class="mm-lbl">${p}</span>`;
+        days.forEach(d => {
+          const isActive = dayMap[d].includes(p);
+          if (isActive) {
+            html += `<span class="mm-cell active" title="${d}요일 ${p}교시 가능">${p}</span>`;
+          } else {
+            html += `<span class="mm-cell">·</span>`;
+          }
+        });
+        html += '</div>';
+      }
+
+      html += '</div>';
+      return html;
+    }
+
+    // 총 희망 차수 인라인 +/- 즉시 증감 제어 (최소 1차시 ~ 최대 10차시)
+    function changeTotalHours(rowId, delta) {
+      const row = appData.requests.find(r => r.id === rowId);
+      if (!row) return;
+
+      const current = Number(row.totalHours) || 1;
+      const newHours = current + delta;
+      if (newHours < 1 || newHours > 10) return;
+
+      const oldHours = current;
+      row.totalHours = newHours; // 낙관적 UI 즉시 업데이트
+      renderTable();
+
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.success) {
+              showToast(`${row.targetClass} 총 차수가 ${newHours}차시로 변경되었습니다.`, 'info');
+            } else {
+              row.totalHours = oldHours; // 실패 시 롤백
+              renderTable();
+              showToast('차수 변경 실패: ' + (res ? res.error : '알 수 없음'), 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            row.totalHours = oldHours; // 오류 시 롤백
+            renderTable();
+            showToast('서버 오류: ' + err.message, 'error');
+          })
+          .updateRequest({ requestId: rowId, totalHours: newHours });
+      } else {
+        localStorage.setItem('class_match_classes', JSON.stringify(appData.requests));
+        showToast(`${row.targetClass} 총 차수가 ${newHours}차시로 변경되었습니다.`, 'info');
+      }
     }
 
     // 스마트 스케줄 매트릭스 토글 (등록용)
@@ -1981,23 +2109,20 @@
         <strong><i class="fa-solid fa-chalkboard"></i> 학급:</strong> ${escapeHtml(row.targetClass)} | 
         <strong>과목:</strong> ${escapeHtml(row.subject)} (${escapeHtml(row.teacherName)} 선생님)<br>
         <strong>총 희망 차수:</strong> ${row.totalHours}차시 | 
-        <strong>가능 요일/교시:</strong> ${escapeHtml(row.availableSchedule)}
+        <strong>보강 가능한 요일과 교시:</strong> ${escapeHtml(row.availableSchedule)}
       `;
-
-      document.getElementById('matchLenderName').value = '';
-      document.getElementById('matchLendDate').value = '';
 
       openModal('modalConfirmMatch');
     }
 
-    // 매칭 완료 확정 제출
+    // 매칭 완료 확정 제출 (추가 입력 없이 원클릭 확정)
     function handleConfirmMatchSubmit(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const rowId = document.getElementById('matchTargetId').value;
       const data = {
         requestId: rowId,
-        matchedTeacher: document.getElementById('matchLenderName').value.trim(),
-        matchedDate: document.getElementById('matchLendDate').value.trim()
+        matchedTeacher: '매칭완료',
+        matchedDate: ''
       };
 
       showLoading(true, '매칭 완료 처리 중...');
@@ -2008,7 +2133,7 @@
             showLoading(false);
             if (res && res.success) {
               closeModal('modalConfirmMatch');
-              showToast('매칭 완료 처리가 등록되었습니다!');
+              showToast('보강 매칭이 완료되어 목록에서 완료 처리되었습니다!');
               fetchData();
             } else {
               showToast('처리 실패: ' + (res ? res.error : '알 수 없음'), 'error');
@@ -2030,10 +2155,51 @@
             localStorage.setItem('class_match_classes', JSON.stringify(appData.requests));
           }
           closeModal('modalConfirmMatch');
-          showToast('매칭 완료 처리가 등록되었습니다!');
+          showToast('보강 매칭이 완료되어 목록에서 완료 처리되었습니다!');
           renderTable();
           updateStats();
         }, 200);
+      }
+    }
+
+    // 보강 희망 내역 삭제
+    function handleDeleteRequest(rowId) {
+      const row = appData.requests.find(r => r.id === rowId);
+      if (!row) return;
+
+      const confirmMsg = `[${row.targetClass} ${row.subject}] 보강 희망 내역을 정말 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.`;
+      if (!confirm(confirmMsg)) return;
+
+      showLoading(true, '보강 희망 내역 삭제 중...');
+
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(res => {
+            showLoading(false);
+            if (res && res.success) {
+              showToast(`${row.targetClass} 보강 희망 내역이 삭제되었습니다.`);
+              fetchData();
+            } else {
+              showToast('삭제 실패: ' + (res ? res.error : '알 수 없음'), 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            showLoading(false);
+            showToast('서버 오류: ' + err.message, 'error');
+          })
+          .deleteRequest(rowId);
+      } else {
+        setTimeout(() => {
+          showLoading(false);
+          const idx = appData.requests.findIndex(r => r.id === rowId);
+          if (idx > -1) {
+            appData.requests.splice(idx, 1);
+            localStorage.setItem('class_match_classes', JSON.stringify(appData.requests));
+          }
+          showToast(`${row.targetClass} 보강 희망 내역이 삭제되었습니다.`);
+          renderTable();
+          updateStats();
+        }, 150);
       }
     }
 
@@ -2115,38 +2281,61 @@ ${row.notes ? `- 메모: ${row.notes}\n` : ''}
       showToast(`${label}가 복사되었습니다!`);
     }
 
-    // 스프레드시트 설정 변경
-    function handleUpdateSheetId() {
-      const val = document.getElementById('settingNewSheetId').value.trim();
-      if (!val) {
-        showToast('스프레드시트 ID 또는 URL을 입력해 주세요.', 'warning');
+    // 안내 메세지 화면 동기화
+    function updateNoticeBanner() {
+      const bannerText = document.getElementById('noticeBannerText');
+      if (bannerText && appData.noticeMessage) {
+        bannerText.innerText = appData.noticeMessage;
+      }
+    }
+
+    // 안내 메세지 수정 모달 열기
+    function openNoticeModal() {
+      const input = document.getElementById('inputNoticeMessage');
+      if (input) {
+        input.value = appData.noticeMessage || '시험 기간 전 특정 학급의 보강이 필요한 선생님이 가능 시간을 등록하고, 수업을 빌려주실 수 있는 동료 선생님과 서로 연결하여 보강을 조율하는 도구입니다.';
+      }
+      openModal('modalNotice');
+    }
+
+    // 안내 메세지 저장
+    function handleSaveNotice(e) {
+      if (e) e.preventDefault();
+      const text = (document.getElementById('inputNoticeMessage')?.value || '').trim();
+      if (!text) {
+        showToast('안내 메세지 내용을 입력해 주세요.', 'warning');
         return;
       }
 
-      showLoading(true, '새 스프레드시트와 연결하는 중...');
+      showLoading(true, '안내 메세지 저장 중...');
 
       if (isGAS()) {
         google.script.run
           .withSuccessHandler(res => {
             showLoading(false);
             if (res && res.success) {
-              showToast('스프레드시트가 성공적으로 변경되었습니다!');
-              document.getElementById('settingNewSheetId').value = '';
-              fetchData();
+              appData.noticeMessage = text;
+              updateNoticeBanner();
+              closeModal('modalNotice');
+              showToast('안내 메세지가 성공적으로 수정되었습니다.');
             } else {
-              showToast('변경 실패: ' + (res ? res.error : '알 수 없음'), 'error');
+              showToast('저장 실패: ' + (res ? res.error : '알 수 없음'), 'error');
             }
           })
           .withFailureHandler(err => {
             showLoading(false);
             showToast('서버 오류: ' + err.message, 'error');
           })
-          .setSpreadsheetId(val);
+          .updateNoticeMessage(text);
       } else {
         setTimeout(() => {
           showLoading(false);
-          showToast('스프레드시트 설정이 변경되었습니다 (로컬 시뮬레이션).');
-        }, 200);
+          appData.noticeMessage = text;
+          localStorage.setItem('class_match_notice', text);
+          updateNoticeBanner();
+          closeModal('modalNotice');
+          showToast('안내 메세지가 성공적으로 수정되었습니다.');
+        }, 150);
       }
     }
 

@@ -201,10 +201,14 @@ function getInitialData() {
       requests.reverse();
     }
 
+    const defaultNotice = '시험 기간 전 특정 학급의 보강이 필요한 선생님이 가능 시간을 등록하고, 수업을 빌려주실 수 있는 동료 선생님과 서로 연결하여 보강을 조율하는 도구입니다.';
+    const noticeMessage = PropertiesService.getScriptProperties().getProperty('NOTICE_MESSAGE') || defaultNotice;
+
     return {
       success: true,
       spreadsheetId: ss.getId(),
       spreadsheetUrl: ss.getUrl(),
+      noticeMessage: noticeMessage,
       requests: requests,
       config: {
         schoolName: '행복고등학교'
@@ -426,6 +430,21 @@ function deleteRequest(requestId) {
     return { success: true, message: '보강 희망 내역이 정상적으로 삭제되었습니다.' };
   } catch (error) {
     console.error('deleteRequest 오류:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * 안내 메세지 저장 API
+ */
+function updateNoticeMessage(message) {
+  try {
+    const text = String(message || '').trim();
+    if (!text) throw new Error('안내 메세지 내용이 비어있습니다.');
+    PropertiesService.getScriptProperties().setProperty('NOTICE_MESSAGE', text);
+    return { success: true, message: '안내 메세지가 저장되었습니다.', noticeMessage: text };
+  } catch (error) {
+    console.error('updateNoticeMessage 오류:', error);
     return { success: false, error: error.message };
   }
 }
