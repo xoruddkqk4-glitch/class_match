@@ -50,8 +50,11 @@ function include(filename) {
  */
 const SHEET_NAMES = {
   REQUESTS: 'Requests',
+  NOTICE: '안내메세지',
   CONFIG: 'Config'
 };
+
+const DEFAULT_NOTICE = '시험 기간 전 특정 학급의 보강이 필요한 선생님이 가능 시간을 등록하고, 수업을 빌려주실 수 있는 동료 선생님과 서로 연결하여 보강을 조율하는 도구입니다.';
 
 const REQUEST_HEADERS = [
   '희망ID',           // A (0) - 고유 희망 ID (예: REQ_123_1)
@@ -65,7 +68,8 @@ const REQUEST_HEADERS = [
   '상태',             // I (8) - OPEN (대기중), MATCHED (매칭완료)
   '대여교사',         // J (9) - 이도덕
   '대여일시',         // K (10) - 10/2(수) 2교시
-  '비고메모'          // L (11) - 시험 범위 및 진도 안내
+  '비고메모',         // L (11) - 시험 범위 및 진도 안내
+  '게시마감일'        // M (12) - YYYY-MM-DD (마감일 경과 시 목록 미노출)
 ];
 
 /**
@@ -123,6 +127,17 @@ function initDatabaseSheets(spreadsheet, addSample) {
     .setFontWeight('bold');
   reqSheet.setFrozenRows(1);
 
+  // 안내메세지 시트 생성 및 초기 A1 안내 문구 설정
+  let noticeSheet = spreadsheet.getSheetByName(SHEET_NAMES.NOTICE);
+  if (!noticeSheet) {
+    noticeSheet = spreadsheet.insertSheet(SHEET_NAMES.NOTICE);
+    noticeSheet.getRange('A1').setValue(DEFAULT_NOTICE);
+    noticeSheet.getRange('A1').setWrap(true);
+    noticeSheet.setColumnWidth(1, 650);
+  } else if (!String(noticeSheet.getRange('A1').getValue() || '').trim()) {
+    noticeSheet.getRange('A1').setValue(DEFAULT_NOTICE);
+  }
+
   // 기본 시트 삭제
   const defaultSheet = spreadsheet.getSheetByName('시트1') || spreadsheet.getSheetByName('Sheet1');
   if (defaultSheet && spreadsheet.getSheets().length > 1) {
@@ -135,30 +150,35 @@ function initDatabaseSheets(spreadsheet, addSample) {
   if (addSample && reqSheet.getLastRow() <= 1) {
     const time1 = formatDate(new Date(Date.now() - 3600000 * 24));
     const time2 = formatDate(new Date(Date.now() - 3600000 * 8));
+    const sampleDeadline = formatDateOnly(new Date(Date.now() + 3600000 * 24 * 10)); // 10일 뒤 마감
     const sampleRows = [
       [
         'REQ_SAMPLE_1', time1,
         '2학년 3반', '수학', '김수학', '302',
         3, '월(3, 5교시) | 수(2교시) | 금(4교시)',
-        'OPEN', '', '', '중간고사 이차함수 시험범위 진도 완료용'
+        'OPEN', '', '', '중간고사 이차함수 시험범위 진도 완료용',
+        sampleDeadline
       ],
       [
         'REQ_SAMPLE_2', time1,
         '2학년 4반', '수학', '김수학', '302',
         2, '월(3, 5교시) | 금(4교시)',
-        'OPEN', '', '', '중간고사 이차함수 시험범위 진도 완료용'
+        'OPEN', '', '', '중간고사 이차함수 시험범위 진도 완료용',
+        sampleDeadline
       ],
       [
         'REQ_SAMPLE_3', time2,
         '1학년 2반', '영어', '박영어', '205',
         1, '화(4교시) | 목(1, 3교시)',
-        'MATCHED', '이도덕', '10/1(화) 4교시', '듣기평가 대비 수업 1차시'
+        'MATCHED', '이도덕', '10/1(화) 4교시', '듣기평가 대비 수업 1차시',
+        sampleDeadline
       ],
       [
         'REQ_SAMPLE_4', time2,
         '3학년 1반', '통합사회', '최사회', '412',
         2, '수(3, 4교시) | 금(2, 5교시)',
-        'OPEN', '', '', '단원 정리 및 수행평가 피드백'
+        'OPEN', '', '', '단원 정리 및 수행평가 피드백',
+        sampleDeadline
       ]
     ];
     reqSheet.getRange(2, 1, sampleRows.length, REQUEST_HEADERS.length).setValues(sampleRows);
@@ -175,6 +195,15 @@ function getInitialData() {
     if (!reqSheet) {
       initDatabaseSheets(ss, true);
       reqSheet = ss.getSheetByName(SHEET_NAMES.REQUESTS);
+    }
+
+    // 기존 시트에 게시마감일 컬럼이 누락되어 있다면 헤더 동기화
+    if (reqSheet.getLastColumn() < REQUEST_HEADERS.length) {
+      reqSheet.getRange(1, 1, 1, REQUEST_HEADERS.length).setValues([REQUEST_HEADERS]);
+      reqSheet.getRange(1, 1, 1, REQUEST_HEADERS.length)
+        .setBackground('#006B67')
+        .setFontColor('#FFFFFF')
+        .setFontWeight('bold');
     }
 
     const lastRow = reqSheet.getLastRow();
@@ -194,15 +223,30 @@ function getInitialData() {
         status: String(row[8] || 'OPEN'), // OPEN (대기중), MATCHED (매칭완료)
         matchedTeacher: String(row[9] || ''),
         matchedDate: String(row[10] || ''),
-        notes: String(row[11] || '')
+        notes: String(row[11] || ''),
+        deadline: formatDateOnly(row[12]) // M열 (12): 게시 마감일
       }));
 
       // 최신 등록 순 정렬
       requests.reverse();
     }
 
-    const defaultNotice = '시험 기간 전 특정 학급의 보강이 필요한 선생님이 가능 시간을 등록하고, 수업을 빌려주실 수 있는 동료 선생님과 서로 연결하여 보강을 조율하는 도구입니다.';
-    const noticeMessage = PropertiesService.getScriptProperties().getProperty('NOTICE_MESSAGE') || defaultNotice;
+    // 구글 스프레드시트의 '안내메세지' 시트 A1 셀 내용 조회
+    let noticeSheet = ss.getSheetByName(SHEET_NAMES.NOTICE);
+    let noticeMessage = '';
+    if (!noticeSheet) {
+      noticeSheet = ss.insertSheet(SHEET_NAMES.NOTICE);
+      noticeSheet.getRange('A1').setValue(DEFAULT_NOTICE);
+      noticeSheet.getRange('A1').setWrap(true);
+      noticeSheet.setColumnWidth(1, 650);
+      noticeMessage = DEFAULT_NOTICE;
+    } else {
+      noticeMessage = String(noticeSheet.getRange('A1').getValue() || '').trim();
+      if (!noticeMessage) {
+        noticeMessage = DEFAULT_NOTICE;
+        noticeSheet.getRange('A1').setValue(DEFAULT_NOTICE);
+      }
+    }
 
     return {
       success: true,
@@ -235,8 +279,12 @@ function createRequest(data) {
     if (!data.subject || !data.teacherName || !data.extensionNumber) {
       throw new Error('필수 정보(교과명, 교사명, 내선번호)가 누락되었습니다.');
     }
+    if (!data.deadline) {
+      throw new Error('게시 마감일을 입력해 주세요.');
+    }
 
     const totalHours = Math.max(1, parseInt(data.totalHours, 10) || 1);
+    const deadlineStr = formatDateOnly(data.deadline);
     const ss = getSpreadsheet();
     const reqSheet = ss.getSheetByName(SHEET_NAMES.REQUESTS);
     if (!reqSheet) {
@@ -262,7 +310,8 @@ function createRequest(data) {
         String(data.availableSchedule || ''),
         'OPEN', // 초기 상태: 대기중
         '', '',
-        String(data.notes || '')
+        String(data.notes || ''),
+        deadlineStr // M열 (12): 게시 마감일
       ];
 
       newRows.push(rowData);
@@ -278,7 +327,8 @@ function createRequest(data) {
         status: 'OPEN',
         matchedTeacher: '',
         matchedDate: '',
-        notes: String(data.notes || '')
+        notes: String(data.notes || ''),
+        deadline: deadlineStr
       });
     });
 
@@ -298,7 +348,7 @@ function createRequest(data) {
 }
 
 /**
- * 보강 희망 수정 API (총 차수, 가능 요일/교시, 내선번호, 메모, 상태 등 수정)
+ * 보강 희망 수정 API (총 차수, 가능 요일/교시, 내선번호, 메모, 마감일, 상태 등 수정)
  */
 function updateRequest(data) {
   try {
@@ -320,7 +370,7 @@ function updateRequest(data) {
     const rowNum = targetIdx + 2;
 
     // 업데이트할 항목 매핑
-    // F열: 내선번호(6열), G열: 총희망차수(7열), H열: 가능요일및교시(8열), I열: 상태(9열), J열: 대여교사(10열), K열: 대여일시(11열), L열: 비고(12열)
+    // F열: 내선번호(6열), G열: 총희망차수(7열), H열: 가능요일및교시(8열), I열: 상태(9열), J열: 대여교사(10열), K열: 대여일시(11열), L열: 비고(12열), M열: 게시마감일(13열)
     if (data.extensionNumber !== undefined) reqSheet.getRange(rowNum, 6).setValue(String(data.extensionNumber));
     if (data.totalHours !== undefined) reqSheet.getRange(rowNum, 7).setValue(Number(data.totalHours));
     if (data.availableSchedule !== undefined) reqSheet.getRange(rowNum, 8).setValue(String(data.availableSchedule));
@@ -328,6 +378,7 @@ function updateRequest(data) {
     if (data.matchedTeacher !== undefined) reqSheet.getRange(rowNum, 10).setValue(String(data.matchedTeacher));
     if (data.matchedDate !== undefined) reqSheet.getRange(rowNum, 11).setValue(String(data.matchedDate));
     if (data.notes !== undefined) reqSheet.getRange(rowNum, 12).setValue(String(data.notes));
+    if (data.deadline !== undefined) reqSheet.getRange(rowNum, 13).setValue(formatDateOnly(data.deadline));
 
     return {
       success: true,
@@ -441,6 +492,22 @@ function updateNoticeMessage(message) {
   try {
     const text = String(message || '').trim();
     if (!text) throw new Error('안내 메세지 내용이 비어있습니다.');
+
+    // 1. 구글 스프레드시트 '안내메세지' 시트 A1 셀에 저장
+    try {
+      const ss = getSpreadsheet();
+      let noticeSheet = ss.getSheetByName(SHEET_NAMES.NOTICE);
+      if (!noticeSheet) {
+        noticeSheet = ss.insertSheet(SHEET_NAMES.NOTICE);
+        noticeSheet.setColumnWidth(1, 650);
+      }
+      noticeSheet.getRange('A1').setValue(text);
+      noticeSheet.getRange('A1').setWrap(true);
+    } catch (sheetErr) {
+      console.warn('안내메세지 시트 쓰기 실패, 프로퍼티에만 저장:', sheetErr);
+    }
+
+    // 2. 스크립트 프로퍼티 동시 저장 (캐시 역할)
     PropertiesService.getScriptProperties().setProperty('NOTICE_MESSAGE', text);
     return { success: true, message: '안내 메세지가 저장되었습니다.', noticeMessage: text };
   } catch (error) {
@@ -480,11 +547,36 @@ function setSpreadsheetId(sheetId) {
  * 날짜 포맷 헬퍼 (YYYY-MM-DD HH:mm)
  */
 function formatDate(d) {
+  if (!d) return '';
   const pad = n => (n < 10 ? '0' + n : n);
-  const year = d.getFullYear();
-  const month = pad(d.getMonth() + 1);
-  const day = pad(d.getDate());
-  const hours = pad(d.getHours());
-  const mins = pad(d.getMinutes());
+  const dateObj = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(dateObj.getTime())) return String(d);
+  const year = dateObj.getFullYear();
+  const month = pad(dateObj.getMonth() + 1);
+  const day = pad(dateObj.getDate());
+  const hours = pad(dateObj.getHours());
+  const mins = pad(dateObj.getMinutes());
   return `${year}-${month}-${day} ${hours}:${mins}`;
+}
+
+/**
+ * 마감일 날짜 전용 포맷 헬퍼 (YYYY-MM-DD)
+ */
+function formatDateOnly(val) {
+  if (!val) return '';
+  const pad = n => (n < 10 ? '0' + n : n);
+  if (val instanceof Date) {
+    if (isNaN(val.getTime())) return '';
+    return `${val.getFullYear()}-${pad(val.getMonth() + 1)}-${pad(val.getDate())}`;
+  }
+  const str = String(val).trim();
+  // "2026-09-25 00:00:00" 등의 경우 앞 10자리 정규식 추출
+  const match = str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (match) {
+    const y = match[1];
+    const m = match[2].length === 1 ? '0' + match[2] : match[2];
+    const d = match[3].length === 1 ? '0' + match[3] : match[3];
+    return `${y}-${m}-${d}`;
+  }
+  return str;
 }

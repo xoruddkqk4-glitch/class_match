@@ -115,31 +115,57 @@
       to { transform: rotate(360deg); }
     }
 
-    /* 웹앱 상단 기능 안내 메세지 배너 */
+    /* 웹앱 상단 기능 안내 메세지 배너 (파스텔 노란색 계열, 동적 폭 및 가운데 정렬) */
     .notice-banner {
-      background: #f0fdfa;
-      border: 1.5px solid var(--primary-border);
+      background: #fffbeb;
+      border: 1.5px solid #fde047;
       border-radius: var(--radius);
-      padding: 9px 14px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 1px 3px rgba(0, 107, 103, 0.08);
-    }
-    .notice-banner .notice-icon {
-      color: var(--primary-color);
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
+      padding: 10px 22px;
+      margin: 0 auto 14px auto;
+      width: fit-content;
+      max-width: 100%;
+      box-sizing: border-box;
+      box-shadow: 0 2px 6px rgba(234, 179, 8, 0.12);
+      display: block;
     }
     .notice-banner .notice-content {
-      font-size: 0.85rem;
-      color: #00524f;
+      font-size: 0.875rem;
+      color: #78350f;
       font-weight: 600;
-      line-height: 1.45;
-      flex: 1;
+      line-height: 1.6;
+      text-align: center;
+      white-space: pre-line;
+      word-break: keep-all;
+    }
+
+    /* 게시 마감일 D-day 뱃지 */
+    .badge-deadline {
+      font-size: 0.725rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      display: inline-block;
+      white-space: nowrap;
+    }
+    .badge-dday-urgent {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+    }
+    .badge-dday-warning {
+      background: #fef3c7;
+      color: #d97706;
+      border: 1px solid #fcd34d;
+    }
+    .badge-dday-normal {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+    .badge-dday-expired {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
     }
 
     /* 학급 열 정렬 헤더 인터액션 스타일 */
@@ -994,7 +1020,6 @@
 
     <!-- 웹앱 기능 안내 메세지 배너 -->
     <div class="notice-banner" id="noticeBanner">
-      <div class="notice-icon"><i class="fa-solid fa-circle-info"></i></div>
       <div class="notice-content" id="noticeBannerText">
         시험 기간 전 특정 학급의 보강이 필요한 선생님이 가능 시간을 등록하고, 수업을 빌려주실 수 있는 동료 선생님과 서로 연결하여 보강을 조율하는 도구입니다.
       </div>
@@ -1014,9 +1039,6 @@
           <button type="button" class="btn btn-primary btn-sm" onclick="openModal('modalCreateRequest')">
             <i class="fa-solid fa-plus"></i> 보강 희망 등록
           </button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="openNoticeModal()" title="상단 안내 메세지 수정">
-            <i class="fa-solid fa-bullhorn"></i> 안내 메세지 수정
-          </button>
           <button type="button" class="btn btn-outline btn-sm" onclick="fetchData(true)" title="데이터 새로고침">
             <i class="fa-solid fa-arrows-rotate" id="tableRefreshIcon"></i>
           </button>
@@ -1027,16 +1049,17 @@
         <table class="schedule-table">
           <thead>
             <tr>
-              <th style="width: 120px;" class="th-sortable" onclick="toggleSortByClass()" title="클릭하여 희망 학급 오름차순/내림차순 정렬">
+              <th style="width: 110px;" class="th-sortable" onclick="toggleSortByClass()" title="클릭하여 희망 학급 오름차순/내림차순 정렬">
                 희망 학급 <span class="sort-icon-wrap" id="classSortIcon"><i class="fa-solid fa-arrow-down-short-wide" style="color: #fde047;"></i></span>
               </th>
-              <th style="width: 100px;">교과명</th>
-              <th style="width: 95px;">희망 교사</th>
-              <th style="width: 100px;">내선번호</th>
-              <th style="width: 110px;">총 희망 차수</th>
-              <th style="width: 210px;">보강 가능한 요일과 교시</th>
-              <th style="width: 210px;">비고 / 메모</th>
-              <th style="width: 165px;">관리 / 작업</th>
+              <th style="width: 90px;">교과명</th>
+              <th style="width: 90px;">희망 교사</th>
+              <th style="width: 95px;">내선번호</th>
+              <th style="width: 105px;">총 희망 차수</th>
+              <th style="width: 115px;">게시 마감일</th>
+              <th style="width: 200px;">보강 가능한 요일과 교시</th>
+              <th style="width: 180px;">비고 / 메모</th>
+              <th style="width: 155px;">관리 / 작업</th>
             </tr>
           </thead>
           <tbody id="tableBody">
@@ -1129,9 +1152,18 @@
               </select>
             </div>
 
+            <!-- 6. 게시 마감일 (달력 입력, 필수) -->
+            <div class="form-group">
+              <label class="form-label">게시 마감일 <span class="req">*</span></label>
+              <input type="date" id="formDeadline" class="form-input" required>
+              <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; display: block;">
+                마감일이 지나면 테이블에서 자동으로 숨김 처리됩니다.
+              </span>
+            </div>
+
             <!-- 6. 가능 요일 및 각 요일별 가능 교시 (스마트 스케줄 매트릭스) -->
             <div class="form-group full">
-              <label class="form-label">가능 요일 및 각 요일 별 가능 교시 <span class="req">*</span></label>
+              <label class="form-label">가능 요일 및 각 요일 별 가능 교시 <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: normal;">(본인의 공강 시간을 선택해 주세요)</span> <span class="req">*</span></label>
               <div class="matrix-box">
                 <div class="matrix-row" data-day="월">
                   <div class="day-badge">월요일</div>
@@ -1222,34 +1254,7 @@
     </div>
   </div>
 
-  <!-- MODAL: 안내 메세지 수정 모달 -->
-  <div id="modalNotice" class="modal-overlay">
-    <div class="modal-dialog" style="max-width: 600px;">
-      <div class="modal-head">
-        <h3><i class="fa-solid fa-bullhorn"></i> 안내 메세지 수정</h3>
-        <button class="modal-close-btn" onclick="closeModal('modalNotice')">&times;</button>
-      </div>
-      <form id="noticeForm" onsubmit="handleSaveNotice(event)">
-        <div class="modal-body">
-          <p style="font-size: 0.825rem; color: var(--text-muted);">
-            웹앱 상단에 표시되는 기능 안내 메세지를 수정합니다. 모든 선생님에게 실시간으로 공유됩니다.
-          </p>
-          <div class="form-group">
-            <label class="form-label">안내 메세지 내용 <span class="req">*</span></label>
-            <textarea id="inputNoticeMessage" class="form-textarea" style="min-height: 85px;" required placeholder="웹앱 기능 및 사용 안내 메세지를 입력하세요..."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline" onclick="closeModal('modalNotice')">취소</button>
-          <button type="submit" class="btn btn-primary">
-            <i class="fa-solid fa-check"></i> 안내 메세지 저장
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 1: 보강 희망 내용 수정 모달 (총 차수, 가능 요일/교시, 내선, 메모 수정) -->
+  <!-- MODAL 1: 보강 희망 내용 수정 모달 (총 차수, 가능 요일/교시, 내선, 메모, 마감일 수정) -->
   <div id="modalEditRequest" class="modal-overlay">
     <div class="modal-dialog" style="max-width: 780px;">
       <div class="modal-head">
@@ -1282,7 +1287,7 @@
 
           <!-- 가능 요일 및 각 요일별 가능 교시 수정 -->
           <div class="form-group">
-            <label class="form-label">가능 요일 및 각 요일 별 가능 교시 <span class="req">*</span></label>
+            <label class="form-label">가능 요일 및 각 요일 별 가능 교시 <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: normal;">(본인의 공강 시간을 선택해 주세요)</span> <span class="req">*</span></label>
             <div class="matrix-box" style="padding: 8px;">
               <div class="matrix-row" data-day="월">
                 <div class="day-badge">월요일</div>
@@ -1356,12 +1361,17 @@
               <input type="text" id="editExtension" class="form-input">
             </div>
             <div class="form-group">
-              <label class="form-label">상태 변경</label>
-              <select id="editStatus" class="form-select">
-                <option value="OPEN">⚡ 대기중 (수업 대여 구함)</option>
-                <option value="MATCHED">✅ 매칭완료</option>
-              </select>
+              <label class="form-label">게시 마감일 <span class="req">*</span></label>
+              <input type="date" id="editDeadline" class="form-input" required>
             </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">상태 변경</label>
+            <select id="editStatus" class="form-select">
+              <option value="OPEN">⚡ 대기중 (수업 대여 구함)</option>
+              <option value="MATCHED">✅ 매칭완료</option>
+            </select>
           </div>
 
           <div class="form-group">
@@ -1443,7 +1453,8 @@
         status: 'OPEN',
         matchedTeacher: '',
         matchedDate: '',
-        notes: '중간고사 이차함수 시험범위 진도 완료용'
+        notes: '중간고사 이차함수 시험범위 진도 완료용',
+        deadline: '2026-09-30'
       },
       {
         id: 'REQ_SAMPLE_2',
@@ -1457,7 +1468,8 @@
         status: 'OPEN',
         matchedTeacher: '',
         matchedDate: '',
-        notes: '중간고사 이차함수 시험범위 진도 완료용'
+        notes: '중간고사 이차함수 시험범위 진도 완료용',
+        deadline: '2026-09-30'
       },
       {
         id: 'REQ_SAMPLE_3',
@@ -1471,7 +1483,8 @@
         status: 'MATCHED',
         matchedTeacher: '이도덕',
         matchedDate: '10/1(화) 4교시',
-        notes: '듣기평가 대비 수업 1차시'
+        notes: '듣기평가 대비 수업 1차시',
+        deadline: '2026-09-28'
       },
       {
         id: 'REQ_SAMPLE_4',
@@ -1485,15 +1498,81 @@
         status: 'OPEN',
         matchedTeacher: '',
         matchedDate: '',
-        notes: '단원 정리 및 수행평가 피드백'
+        notes: '단원 정리 및 수행평가 피드백',
+        deadline: '2026-10-02'
       }
     ];
+
+    // 마감일 경과 여부 확인 (오늘 날짜가 마감일보다 뒤이면 true)
+    function isDeadlinePassed(deadlineStr) {
+      if (!deadlineStr || !String(deadlineStr).trim()) return false;
+      const today = new Date();
+      const pad = n => (n < 10 ? '0' + n : n);
+      const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+      const cleanDeadline = String(deadlineStr).trim().substring(0, 10);
+      return cleanDeadline < todayStr;
+    }
+
+    // 마감일 D-day 뱃지 생성 헬퍼
+    function getDeadlineBadge(deadlineStr) {
+      if (!deadlineStr || !String(deadlineStr).trim()) {
+        return '<span style="color: #94a3b8; font-size: 0.8rem;">-</span>';
+      }
+      const clean = String(deadlineStr).trim().substring(0, 10);
+      const parts = clean.split('-');
+      if (parts.length < 3) {
+        return `<span style="font-size:0.8rem;">${escapeHtml(clean)}</span>`;
+      }
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      target.setHours(0, 0, 0, 0);
+
+      const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+      let badgeClass = 'badge-dday-normal';
+      let badgeText = `D-${diffDays}`;
+
+      if (diffDays === 0) {
+        badgeClass = 'badge-dday-urgent';
+        badgeText = '오늘 마감';
+      } else if (diffDays === 1) {
+        badgeClass = 'badge-dday-warning';
+        badgeText = '내일 마감';
+      } else if (diffDays < 0) {
+        badgeClass = 'badge-dday-expired';
+        badgeText = '마감됨';
+      }
+
+      return `
+        <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+          <span class="badge-deadline ${badgeClass}">${badgeText}</span>
+          <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 500;">${escapeHtml(clean)}</span>
+        </div>
+      `;
+    }
+
+    // 신규 등록 폼 마감일 기본값 설정 (오늘 기준 7일 뒤, 과거 날짜 선택 방지)
+    function setDefaultDeadline() {
+      const deadlineInput = document.getElementById('formDeadline');
+      if (deadlineInput) {
+        const today = new Date();
+        const pad = n => (n < 10 ? '0' + n : n);
+        const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+        deadlineInput.min = todayStr;
+
+        const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const nextWeekStr = `${nextWeek.getFullYear()}-${pad(nextWeek.getMonth() + 1)}-${pad(nextWeek.getDate())}`;
+        deadlineInput.value = nextWeekStr;
+      }
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       renderClassToggleButtons();
       renderSelectedClasses();
       updateSortIcon();
       updateNoticeBanner();
+      setDefaultDeadline();
       fetchData();
     });
 
@@ -1556,7 +1635,7 @@
     }
 
     function updateStats() {
-      const openCount = appData.requests.filter(r => r.status !== 'MATCHED').length;
+      const openCount = appData.requests.filter(r => r.status !== 'MATCHED' && !isDeadlinePassed(r.deadline)).length;
       const badge = document.getElementById('badgeTable');
       if (badge) badge.innerText = `${openCount}개 학급 대기중`;
     }
@@ -1664,13 +1743,20 @@
       }
     }
 
-    // 테이블 렌더링 (매칭 완료된 행 숨김 & 학급 오름차순/내림차순 정렬)
+    // 테이블 렌더링 (매칭 완료된 행 및 마감일 지난 행 숨김 & 학급 오름차순/내림차순 정렬)
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       if (!tbody) return;
 
-      // 1. 매칭이 모두 완료된 경우(총 차시가 모두 매칭된 경우) 테이블에서 숨김
-      let displayRows = appData.requests.filter(row => row.status !== 'MATCHED');
+      // 1. 테이블에서 안보이는 경우:
+      //   - 삭제 시: 데이터 배열에서 제거되어 없음
+      //   - 매칭완료 시: status === 'MATCHED'
+      //   - 입력한 마감일 지난 후: isDeadlinePassed(deadline) === true
+      let displayRows = appData.requests.filter(row => {
+        if (row.status === 'MATCHED') return false;
+        if (isDeadlinePassed(row.deadline)) return false;
+        return true;
+      });
 
       // 2. 희망 학급 기준 오름차순/내림차순 정렬
       displayRows.sort((a, b) => {
@@ -1690,7 +1776,7 @@
       if (displayRows.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+            <td colspan="9" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
               <i class="fa-solid fa-inbox" style="font-size: 1.8rem; margin-bottom: 6px; display: block; color: #cbd5e1;"></i>
               현재 대기 중인 보강 희망 학급이 없습니다. 상단의 [+ 보강 희망 등록]을 진행해 보세요.
             </td>
@@ -1699,7 +1785,7 @@
         return;
       }
 
-      // 4. 상태 및 매칭 정보 열이 제거된 8개 컬럼 렌더링
+      // 4. 9개 컬럼 렌더링 (게시 마감일 열 포함)
       tbody.innerHTML = displayRows.map(row => {
         // 버튼 액션: [수정], [삭제], [매칭완료]
         let actionButtons = `
@@ -1737,8 +1823,9 @@
                 </button>
               </div>
             </td>
-            <td style="width: 210px;">${renderMiniScheduleMatrix(row.availableSchedule)}</td>
-            <td style="width: 210px; font-size:0.8rem; color:var(--text-muted); text-align:left; word-break:break-all;">
+            <td>${getDeadlineBadge(row.deadline)}</td>
+            <td style="width: 200px;">${renderMiniScheduleMatrix(row.availableSchedule)}</td>
+            <td style="width: 180px; font-size:0.8rem; color:var(--text-muted); text-align:left; word-break:break-all;">
               ${escapeHtml(row.notes || '-')}
             </td>
             <td>${actionButtons}</td>
@@ -1910,6 +1997,12 @@
         return;
       }
 
+      const deadlineVal = document.getElementById('formDeadline').value.trim();
+      if (!deadlineVal) {
+        showToast('게시 마감일을 입력해 주세요.', 'warning');
+        return;
+      }
+
       const scheduleStr = getFormattedScheduleFromMap(selectedDayPeriods);
       if (!scheduleStr) {
         showToast('가능 요일 및 교시를 최소 1개 이상 선택해 주세요.', 'warning');
@@ -1922,6 +2015,7 @@
         teacherName: document.getElementById('formTeacherName').value.trim(),
         extensionNumber: document.getElementById('formExtension').value.trim(),
         totalHours: Number(document.getElementById('formTotalHours').value) || 1,
+        deadline: deadlineVal,
         availableSchedule: scheduleStr,
         notes: document.getElementById('formNotes').value.trim()
       };
@@ -1962,6 +2056,7 @@
               teacherName: requestData.teacherName,
               extensionNumber: requestData.extensionNumber,
               totalHours: requestData.totalHours,
+              deadline: requestData.deadline,
               availableSchedule: requestData.availableSchedule,
               status: 'OPEN',
               matchedTeacher: '',
@@ -1987,9 +2082,10 @@
       selectedDayPeriods = {};
       document.querySelectorAll('#modalCreateRequest .period-btn').forEach(b => b.classList.remove('selected'));
       updateSchedulePreview('schedulePreviewText', selectedDayPeriods);
+      setDefaultDeadline();
     }
 
-    // 수정 모달 열기 (총 차수, 가능 요일/교시, 내선, 메모 로딩)
+    // 수정 모달 열기 (총 차수, 가능 요일/교시, 내선, 메모, 마감일 로딩)
     function openEditModal(rowId) {
       const row = appData.requests.find(r => r.id === rowId);
       if (!row) return;
@@ -2002,6 +2098,7 @@
 
       document.getElementById('editTotalHours').value = String(row.totalHours || 1);
       document.getElementById('editExtension').value = row.extensionNumber || '';
+      document.getElementById('editDeadline').value = row.deadline ? String(row.deadline).substring(0, 10) : '';
       document.getElementById('editStatus').value = row.status || 'OPEN';
       document.getElementById('editNotes').value = row.notes || '';
 
@@ -2051,11 +2148,18 @@
         return;
       }
 
+      const deadlineVal = document.getElementById('editDeadline').value.trim();
+      if (!deadlineVal) {
+        showToast('게시 마감일을 입력해 주세요.', 'warning');
+        return;
+      }
+
       const updateData = {
         requestId: rowId,
         totalHours: Number(document.getElementById('editTotalHours').value) || 1,
         availableSchedule: scheduleStr,
         extensionNumber: document.getElementById('editExtension').value.trim(),
+        deadline: deadlineVal,
         status: document.getElementById('editStatus').value,
         notes: document.getElementById('editNotes').value.trim()
       };
@@ -2087,6 +2191,7 @@
             target.totalHours = updateData.totalHours;
             target.availableSchedule = updateData.availableSchedule;
             target.extensionNumber = updateData.extensionNumber;
+            target.deadline = updateData.deadline;
             target.status = updateData.status;
             target.notes = updateData.notes;
             localStorage.setItem('class_match_classes', JSON.stringify(appData.requests));
@@ -2289,55 +2394,6 @@ ${row.notes ? `- 메모: ${row.notes}\n` : ''}
       }
     }
 
-    // 안내 메세지 수정 모달 열기
-    function openNoticeModal() {
-      const input = document.getElementById('inputNoticeMessage');
-      if (input) {
-        input.value = appData.noticeMessage || '시험 기간 전 특정 학급의 보강이 필요한 선생님이 가능 시간을 등록하고, 수업을 빌려주실 수 있는 동료 선생님과 서로 연결하여 보강을 조율하는 도구입니다.';
-      }
-      openModal('modalNotice');
-    }
-
-    // 안내 메세지 저장
-    function handleSaveNotice(e) {
-      if (e) e.preventDefault();
-      const text = (document.getElementById('inputNoticeMessage')?.value || '').trim();
-      if (!text) {
-        showToast('안내 메세지 내용을 입력해 주세요.', 'warning');
-        return;
-      }
-
-      showLoading(true, '안내 메세지 저장 중...');
-
-      if (isGAS()) {
-        google.script.run
-          .withSuccessHandler(res => {
-            showLoading(false);
-            if (res && res.success) {
-              appData.noticeMessage = text;
-              updateNoticeBanner();
-              closeModal('modalNotice');
-              showToast('안내 메세지가 성공적으로 수정되었습니다.');
-            } else {
-              showToast('저장 실패: ' + (res ? res.error : '알 수 없음'), 'error');
-            }
-          })
-          .withFailureHandler(err => {
-            showLoading(false);
-            showToast('서버 오류: ' + err.message, 'error');
-          })
-          .updateNoticeMessage(text);
-      } else {
-        setTimeout(() => {
-          showLoading(false);
-          appData.noticeMessage = text;
-          localStorage.setItem('class_match_notice', text);
-          updateNoticeBanner();
-          closeModal('modalNotice');
-          showToast('안내 메세지가 성공적으로 수정되었습니다.');
-        }, 150);
-      }
-    }
 
     function openModal(id) {
       const m = document.getElementById(id);
