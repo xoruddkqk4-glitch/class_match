@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Class Match | 교사용 학급 보강 매칭 시스템</title>
+  <!-- Noto Sans KR Font & FontAwesome 6 Icons (홍익 보강 알리미 테마) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #006b67;       /* 보강 목록 헤더 청록색 */
+      --primary-hover: #00524f;
+      --primary-light: #e6f4f1;       /* 테이블 짝수행 연한 민트 */
+      --primary-border: #b2dfdb;
+      --accent-color: #0d9488;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --bg-canvas: #f8fafc;
+      --card-bg: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 대시보드 헤더 */
+    .app-header {
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .app-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-date-badge {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      padding: 3px 12px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-refresh-header {
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      background: #ffffff;
+      border: 1.5px solid var(--primary-border);
+      padding: 3px 12px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 107, 103, 0.12);
+      outline: none;
+    }
+
+    .btn-refresh-header:hover:not(:disabled) {
+      background: var(--primary-light);
+      border-color: var(--primary-color);
+      box-shadow: 0 2px 6px rgba(0, 107, 103, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .spin-animation {
+      animation: spin-icon 0.8s linear infinite;
+    }
+
+    @keyframes spin-icon {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* 테이블 열 별 필터 헤더 (21-홍익_보강 지원 프로젝트 표준) */
+    .filter-header-row th {
+      background-color: #f8fafc;
+      padding: 6px 5px;
+      border: 1px solid #cbd5e1;
+      color: var(--text-main) !important;
+      vertical-align: middle;
+    }
+
+    .col-filter-input, .col-filter-select {
+      width: 100%;
+      padding: 5px 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      outline: none;
+      background: #ffffff;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    .col-filter-input:focus, .col-filter-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0, 107, 103, 0.15);
+      background-color: #ffffff;
+    }
+
+    .btn-reset-filters {
+      padding: 4px 8px;
+      font-size: 0.775rem;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      background: #ffffff;
+      color: #334155;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .btn-reset-filters:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: var(--primary-color);
+    }
+
+    .animate-spin-ccw {
+      animation: spin-ccw 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes spin-ccw {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(-360deg); }
+    }
+
+    .btn-clicked-pulse {
+      animation: buttonPulse 0.35s ease;
+    }
+
+    @keyframes buttonPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.92); }
+      100% { transform: scale(1); }
+    }
+
+    /* 테이블 카드 및 툴바 */
+    .table-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid #cbd5e1;
+      overflow: hidden;
+    }
+
+    .table-header-title {
+      background: #f1f5f9;
+      padding: 7px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .header-controls-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .header-controls-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .header-title-text {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-right: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .filter-select, .filter-input {
+      padding: 4px 8px;
+      font-size: 0.825rem;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .filter-select:focus, .filter-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0, 107, 103, 0.15);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 2px;
+      background: #b4e3df;
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid #70b8b2;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .btn-sm.btn-preset {
+      padding: 3px 7px !important;
+      font-size: 0.75rem !important;
+      background: #ffffff;
+      border: 1px solid #80cbc4;
+      color: #005a56;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-preset:hover {
+      background: #e0f2f1;
+      border-color: var(--primary-color);
+      color: #003734;
+    }
+
+    .btn-preset.active {
+      background: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
+      color: #ffffff !important;
+      font-weight: 800;
+    }
+
+    /* 버튼 기본 스타일 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.825rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 107, 103, 0.25);
+    }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+
+    .btn-outline {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+    }
+    .btn-outline:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .btn-success { background: #047857; color: #ffffff; }
+    .btn-success:hover { background: #065f46; }
+
+    .btn-sm { padding: 3px 8px; font-size: 0.775rem; }
+    .btn-action-sm {
+      padding: 3px 7px !important;
+      font-size: 0.775rem !important;
+      letter-spacing: -0.3px;
+      font-weight: 700;
+    }
+
+    /* 테이블 스타일 (학급당 1행 표시) */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      min-width: 980px;
+    }
+
+    .schedule-table th {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.875rem;
+      padding: 10px 8px;
+      border: 1px solid #005753;
+      white-space: nowrap;
+    }
+
+    .schedule-table td {
+      padding: 9px 8px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .schedule-table tr:nth-child(even) {
+      background-color: var(--primary-light);
+    }
+
+    .schedule-table tr:hover {
+      background-color: #d1ebe5;
+    }
+
+    /* 뱃지 */
+    .badge-class {
+      display: inline-block;
+      background: #334155;
+      color: #ffffff;
+      font-size: 0.825rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .badge-total-hours {
+      display: inline-block;
+      background: var(--primary-color);
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    .badge-ext {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      background: #ffffff;
+      border: 1px solid var(--primary-border);
+      padding: 2px 7px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .badge-ext:hover {
+      background: #e0f2f1;
+      border-color: var(--primary-color);
+    }
+
+    .badge-status-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+      white-space: nowrap;
+    }
+
+    .badge-status-matched {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      white-space: nowrap;
+    }
+
+    .sch-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      justify-content: center;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .sch-chip {
+      background: #ffffff;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* 폼 카드 및 다중 학급 선택 */
+    .form-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid #cbd5e1;
+      padding: 20px 24px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .form-title-bar {
+      padding-bottom: 12px;
+      border-bottom: 1.5px solid var(--primary-border);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .form-title-bar h2 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .form-label .req { color: #dc2626; }
+
+    .form-input, .form-select, .form-textarea {
+      padding: 6px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0, 107, 103, 0.15);
+    }
+
+    .form-textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    /* 학급 다중 선택 박스 (복수 학급 선택 지원) */
+    .class-multi-selector {
+      background: #f8fafc;
+      border: 1px solid var(--primary-border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .class-selector-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .class-chips-group {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .class-toggle-btn {
+      padding: 2px 7px;
+      font-size: 0.775rem;
+      font-weight: 700;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .class-toggle-btn:hover {
+      background: #e0f2f1;
+      border-color: var(--primary-color);
+    }
+    .class-toggle-btn.selected {
+      background: var(--primary-color) !important;
+      color: #ffffff !important;
+      border-color: var(--primary-color) !important;
+      box-shadow: 0 1px 3px rgba(0, 107, 103, 0.3);
+    }
+
+    .selected-classes-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      min-height: 32px;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 5px 8px;
+      border-radius: 4px;
+    }
+
+    .selected-class-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      color: var(--primary-color);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .remove-class-btn {
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: #dc2626;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* 요일 및 교시 선택 매트릭스 */
+    .matrix-box {
+      background: #f8fafc;
+      border: 1px solid var(--primary-border);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .matrix-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .matrix-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .day-badge {
+      font-size: 0.8rem;
+      font-weight: 800;
+      width: 48px;
+      color: var(--primary-color);
+    }
+
+    .period-btn-group {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+
+    .period-btn {
+      padding: 2px 7px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .period-btn:hover {
+      background: #e0f2f1;
+      border-color: var(--primary-color);
+    }
+    .period-btn.selected {
+      background: var(--primary-color) !important;
+      color: #ffffff !important;
+      border-color: var(--primary-color) !important;
+      box-shadow: 0 1px 3px rgba(0, 107, 103, 0.3);
+    }
+
+    .preview-box {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      padding: 6px 10px;
+      border-radius: 4px;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* 모달 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(3px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal-dialog {
+      background: #ffffff;
+      border-radius: var(--radius);
+      max-width: 580px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: modalSlide 0.2s ease;
+      border: 1px solid var(--primary-border);
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+    @keyframes modalSlide {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-head {
+      background: var(--primary-color);
+      color: #ffffff;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .modal-head h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: #ffffff;
+      opacity: 0.85;
+    }
+    .modal-close-btn:hover { opacity: 1; }
+
+    .modal-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 10px 16px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* 토스트 */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 8px 14px;
+      border-radius: 6px;
+      box-shadow: var(--shadow-lg);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: auto;
+      animation: toastIn 0.2s ease;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 로더 */
+    .loader-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(2px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .loader-backdrop.show { display: flex; }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 4px solid #b2dfdb;
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin-icon 0.8s linear infinite;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .app-title { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 로딩 오버레이 -->
+  <div id="loadingOverlay" class="loader-backdrop">
+    <div class="spinner"></div>
+    <div id="loadingText" style="font-weight: 700; color: var(--primary-color); font-size: 0.9rem;">데이터 동기화 중...</div>
+  </div>
+
+  <div class="container">
+    <!-- 헤더 -->
+    <header class="app-header">
+      <h1 class="app-title">
+        <i class="fa-solid fa-handshake-angle"></i> Class Match
+        <span class="header-date-badge">
+          <i class="fa-solid fa-school"></i> 교사용 보강 매칭 시스템
+        </span>
+        <button type="button" class="btn-refresh-header" id="btnRefreshHeader" onclick="fetchData(true)" title="구글 시트 데이터 실시간 새로 고침">
+          <i class="fa-solid fa-rotate" id="headerRefreshIcon"></i>
+          <span id="headerRefreshText">새로 고침</span>
+        </button>
+      </h1>
+    </header>
+
+    <!-- MAIN TABLE CARD (학급마다 하나의 행으로 표시) -->
+    <main class="table-card">
+      <div class="table-header-title">
+        <div class="header-controls-left">
+          <span class="header-title-text">
+            <i class="fa-solid fa-calendar-check" style="color: var(--primary-color);"></i> 학급별 보강 희망 현황
+          </span>
+          <span id="badgeTable" style="font-size: 0.8rem; font-weight: 700; background: var(--primary-light); color: var(--primary-color); border: 1px solid var(--primary-border); padding: 2px 9px; border-radius: 12px;">0개 학급</span>
+        </div>
+
+        <div class="header-controls-right">
+          <button type="button" class="btn btn-primary btn-sm" onclick="openModal('modalCreateRequest')">
+            <i class="fa-solid fa-plus"></i> 보강 희망 등록
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="openModal('modalSettings')" title="스프레드시트 설정">
+            <i class="fa-solid fa-gear"></i> 시트 설정
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="fetchData(true)" title="데이터 새로고침">
+            <i class="fa-solid fa-arrows-rotate" id="tableRefreshIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">상태</th>
+              <th style="width: 105px;">희망 학급</th>
+              <th style="width: 90px;">교과명</th>
+              <th style="width: 85px;">희망 교사</th>
+              <th style="width: 95px;">내선번호</th>
+              <th style="width: 90px;">총 희망 차수</th>
+              <th>가능 요일 및 각 요일별 가능 교시</th>
+              <th style="width: 130px;">매칭 정보</th>
+              <th>비고 / 메모</th>
+              <th style="width: 165px;">관리 / 작업</th>
+            </tr>
+            <!-- 열 별 필터 검색 행 (21-홍익_보강 지원 프로젝트 표준) -->
+            <tr class="filter-header-row">
+              <th>
+                <select class="col-filter-select" id="filterColStatus" onchange="applyColumnFilters()">
+                  <option value="">전체 상태</option>
+                  <option value="OPEN">대기중</option>
+                  <option value="MATCHED">매칭완료</option>
+                </select>
+              </th>
+              <th>
+                <select class="col-filter-select" id="filterColClass" onchange="applyColumnFilters()">
+                  <option value="">전체 학급</option>
+                  <optgroup label="1학년">
+                    <option value="1학년">1학년 전체</option>
+                    <option value="1학년 1반">1학년 1반</option><option value="1학년 2반">1학년 2반</option><option value="1학년 3반">1학년 3반</option><option value="1학년 4반">1학년 4반</option><option value="1학년 5반">1학년 5반</option><option value="1학년 6반">1학년 6반</option><option value="1학년 7반">1학년 7반</option><option value="1학년 8반">1학년 8반</option><option value="1학년 9반">1학년 9반</option><option value="1학년 10반">1학년 10반</option><option value="1학년 11반">1학년 11반</option><option value="1학년 12반">1학년 12반</option><option value="1학년 13반">1학년 13반</option><option value="1학년 14반">1학년 14반</option><option value="1학년 15반">1학년 15반</option>
+                  </optgroup>
+                  <optgroup label="2학년">
+                    <option value="2학년">2학년 전체</option>
+                    <option value="2학년 1반">2학년 1반</option><option value="2학년 2반">2학년 2반</option><option value="2학년 3반">2학년 3반</option><option value="2학년 4반">2학년 4반</option><option value="2학년 5반">2학년 5반</option><option value="2학년 6반">2학년 6반</option><option value="2학년 7반">2학년 7반</option><option value="2학년 8반">2학년 8반</option><option value="2학년 9반">2학년 9반</option><option value="2학년 10반">2학년 10반</option><option value="2학년 11반">2학년 11반</option><option value="2학년 12반">2학년 12반</option><option value="2학년 13반">2학년 13반</option><option value="2학년 14반">2학년 14반</option><option value="2학년 15반">2학년 15반</option>
+                  </optgroup>
+                  <optgroup label="3학년">
+                    <option value="3학년">3학년 전체</option>
+                    <option value="3학년 1반">3학년 1반</option><option value="3학년 2반">3학년 2반</option><option value="3학년 3반">3학년 3반</option><option value="3학년 4반">3학년 4반</option><option value="3학년 5반">3학년 5반</option><option value="3학년 6반">3학년 6반</option><option value="3학년 7반">3학년 7반</option><option value="3학년 8반">3학년 8반</option><option value="3학년 9반">3학년 9반</option><option value="3학년 10반">3학년 10반</option><option value="3학년 11반">3학년 11반</option><option value="3학년 12반">3학년 12반</option><option value="3학년 13반">3학년 13반</option><option value="3학년 14반">3학년 14반</option><option value="3학년 15반">3학년 15반</option>
+                  </optgroup>
+                </select>
+              </th>
+              <th>
+                <input type="text" class="col-filter-input" id="filterColSubject" placeholder="교과 검색..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <input type="text" class="col-filter-input" id="filterColTeacher" placeholder="교사 검색..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <input type="text" class="col-filter-input" id="filterColExt" placeholder="내선 검색..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <select class="col-filter-select" id="filterColTotalHours" onchange="applyColumnFilters()">
+                  <option value="">전체 차시</option>
+                  <option value="1">1차시</option>
+                  <option value="2">2차시</option>
+                  <option value="3">3차시</option>
+                  <option value="4">4차시</option>
+                  <option value="5">5차시</option>
+                  <option value="6">6차시</option>
+                  <option value="7">7차시</option>
+                  <option value="8">8차시</option>
+                  <option value="9">9차시</option>
+                  <option value="10">10차시</option>
+                </select>
+              </th>
+              <th>
+                <input type="text" class="col-filter-input" id="filterColSchedule" placeholder="요일/교시 검색..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <input type="text" class="col-filter-input" id="filterColMatched" placeholder="매칭 교사 검색..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <input type="text" class="col-filter-input" id="filterColNotes" placeholder="메모 검색..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <button type="button" class="btn-reset-filters" id="btnResetFilters" onclick="resetColumnFilters(event)" title="열 필터 초기화">
+                  <i id="resetIcon" class="fa-solid fa-rotate-left"></i> 초기화
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- JS 렌더링 -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: 보강 희망 등록 (복수 학급 선택 지원) -->
+  <div id="modalCreateRequest" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 780px;">
+      <div class="modal-head">
+        <h3><i class="fa-solid fa-clipboard-question"></i> 보강 희망 등록</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalCreateRequest')">&times;</button>
+      </div>
+      <form id="requestForm" onsubmit="handleCreateRequest(event)">
+        <div class="modal-body">
+          <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 2px;">
+            복수 학급 선택이 가능하며, 선택된 학급마다 테이블에 1행씩 자동 등록됩니다.
+          </p>
+
+          <div class="form-grid">
+            <!-- 1. 희망 학급 (복수 선택 지원) -->
+            <div class="form-group full">
+              <label class="form-label">
+                희망 학급 (복수 선택 가능) <span class="req">*</span>
+              </label>
+              <div class="class-multi-selector">
+                <div class="class-selector-head">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary-color);">학년 선택:</span>
+                  <select id="gradeSelectBox" class="filter-select" onchange="renderClassToggleButtons()" style="width: 95px;">
+                    <option value="1학년">1학년</option>
+                    <option value="2학년" selected>2학년</option>
+                    <option value="3학년">3학년</option>
+                  </select>
+
+                  <div class="class-chips-group" id="classChipsGroup">
+                    <!-- 1반 ~ 15반 버튼 동적 생성 -->
+                  </div>
+
+                  <button type="button" class="btn btn-outline btn-sm" onclick="addAllClassesForGrade()" style="font-size: 0.725rem; padding: 2px 6px;">
+                    + 해당 학년 전체
+                  </button>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="clearSelectedClasses()" style="font-size: 0.725rem; padding: 2px 6px; color: #dc2626;">
+                    선택 초기화
+                  </button>
+                </div>
+
+                <!-- 선택된 학급 태그 목록 -->
+                <div class="selected-classes-list" id="selectedClassesList">
+                  <span style="font-size: 0.8rem; color: #94a3b8;">위의 반 버튼을 클릭하여 희망 학급을 추가해 주세요. (여러 반 선택 가능)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. 교과명 -->
+            <div class="form-group">
+              <label class="form-label">교과명 <span class="req">*</span></label>
+              <input type="text" id="formSubject" class="form-input" placeholder="교과명 직접 입력 (예: 수학, 영어, 통합사회...)" required>
+            </div>
+
+            <!-- 3. 희망 교사명 -->
+            <div class="form-group">
+              <label class="form-label">희망 교사명 <span class="req">*</span></label>
+              <input type="text" id="formTeacherName" class="form-input" placeholder="교사명 직접 입력 (예: 김수학)" required>
+            </div>
+
+            <!-- 4. 내선번호 -->
+            <div class="form-group">
+              <label class="form-label">내선번호 <span class="req">*</span></label>
+              <input type="text" id="formExtension" class="form-input" placeholder="교내 내선번호 직접 입력 (예: 302)" required>
+            </div>
+
+            <!-- 5. 총 희망 차수 (1~10차시) -->
+            <div class="form-group">
+              <label class="form-label">총 희망 차수 <span class="req">*</span></label>
+              <select id="formTotalHours" class="form-select" required>
+                <option value="1">1차시</option>
+                <option value="2">2차시</option>
+                <option value="3" selected>3차시</option>
+                <option value="4">4차시</option>
+                <option value="5">5차시</option>
+                <option value="6">6차시</option>
+                <option value="7">7차시</option>
+                <option value="8">8차시</option>
+                <option value="9">9차시</option>
+                <option value="10">10차시</option>
+              </select>
+            </div>
+
+            <!-- 6. 가능 요일 및 각 요일별 가능 교시 (스마트 스케줄 매트릭스) -->
+            <div class="form-group full">
+              <label class="form-label">가능 요일 및 각 요일 별 가능 교시 <span class="req">*</span></label>
+              <div class="matrix-box">
+                <div class="matrix-row" data-day="월">
+                  <div class="day-badge">월요일</div>
+                  <div class="period-btn-group">
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '월', '1교시')">1교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '월', '2교시')">2교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '월', '3교시')">3교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '월', '4교시')">4교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '월', '5교시')">5교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '월', '6교시')">6교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '월', '7교시')">7교시</button>
+                  </div>
+                </div>
+
+                <div class="matrix-row" data-day="화">
+                  <div class="day-badge">화요일</div>
+                  <div class="period-btn-group">
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '화', '1교시')">1교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '화', '2교시')">2교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '화', '3교시')">3교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '화', '4교시')">4교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '화', '5교시')">5교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '화', '6교시')">6교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '화', '7교시')">7교시</button>
+                  </div>
+                </div>
+
+                <div class="matrix-row" data-day="수">
+                  <div class="day-badge">수요일</div>
+                  <div class="period-btn-group">
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '수', '1교시')">1교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '수', '2교시')">2교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '수', '3교시')">3교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '수', '4교시')">4교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '수', '5교시')">5교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '수', '6교시')">6교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '수', '7교시')">7교시</button>
+                  </div>
+                </div>
+
+                <div class="matrix-row" data-day="목">
+                  <div class="day-badge">목요일</div>
+                  <div class="period-btn-group">
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '목', '1교시')">1교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '목', '2교시')">2교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '목', '3교시')">3교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '목', '4교시')">4교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '목', '5교시')">5교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '목', '6교시')">6교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '목', '7교시')">7교시</button>
+                  </div>
+                </div>
+
+                <div class="matrix-row" data-day="금">
+                  <div class="day-badge">금요일</div>
+                  <div class="period-btn-group">
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '금', '1교시')">1교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '금', '2교시')">2교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '금', '3교시')">3교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '금', '4교시')">4교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '금', '5교시')">5교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '금', '6교시')">6교시</button>
+                    <button type="button" class="period-btn" onclick="togglePeriod(this, '금', '7교시')">7교시</button>
+                  </div>
+                </div>
+
+                <div class="preview-box" id="schedulePreviewText">
+                  선택된 가능 요일 및 교시가 여기에 자동 포맷팅됩니다. (예: 월(3, 5교시) | 수(2교시) | 금(4교시))
+                </div>
+              </div>
+            </div>
+
+            <!-- 7. 비고/메모 -->
+            <div class="form-group full">
+              <label class="form-label">비고/메모 <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: normal;">(시험 범위 또는 진도 안내)</span></label>
+              <textarea id="formNotes" class="form-textarea" placeholder="시험 범위 또는 진도 안내 입력 (예: 중간고사 시험 범위 진도 마무리 및 수행평가 피드백)"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalCreateRequest')">닫기</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i> 보강 희망 등록하기
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: 스프레드시트 설정 모달 -->
+  <div id="modalSettings" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 640px;">
+      <div class="modal-head">
+        <h3><i class="fa-solid fa-database"></i> 스프레드시트 연동 설정</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalSettings')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">현재 연결된 스프레드시트 링크</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="settingSheetUrl" class="form-input" readonly style="background: #f1f5f9; flex: 1;">
+            <a id="btnOpenSheet" href="#" target="_blank" class="btn btn-outline">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> 시트 열기
+            </a>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">스프레드시트 ID 또는 URL 직접 변경</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="settingNewSheetId" class="form-input" placeholder="구글 시트 ID 또는 전체 URL 입력..." style="flex: 1;">
+            <button type="button" class="btn btn-primary" onclick="handleUpdateSheetId()">연결 변경</button>
+          </div>
+          <span style="font-size: 0.775rem; color: var(--text-muted);">
+            새로운 구글 스프레드시트 URL 또는 ID를 입력하여 연결을 전환할 수 있습니다.
+          </span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalSettings')">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1: 보강 희망 내용 수정 모달 (총 차수, 가능 요일/교시, 내선, 메모 수정) -->
+  <div id="modalEditRequest" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <h3><i class="fa-solid fa-pen-to-square"></i> 보강 희망 내용 수정</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalEditRequest')">&times;</button>
+      </div>
+      <form id="editRequestForm" onsubmit="handleEditFormSubmit(event)">
+        <input type="hidden" id="editRequestId">
+        <div class="modal-body">
+          <div id="editTargetSummary" style="background: var(--primary-light); border: 1px solid var(--primary-border); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; color: #005a56;">
+            <!-- Target summary text -->
+          </div>
+
+          <!-- 총 희망 차수 수정 -->
+          <div class="form-group">
+            <label class="form-label">총 희망 차수 <span class="req">*</span></label>
+            <select id="editTotalHours" class="form-select" required>
+              <option value="1">1차시</option>
+              <option value="2">2차시</option>
+              <option value="3">3차시</option>
+              <option value="4">4차시</option>
+              <option value="5">5차시</option>
+              <option value="6">6차시</option>
+              <option value="7">7차시</option>
+              <option value="8">8차시</option>
+              <option value="9">9차시</option>
+              <option value="10">10차시</option>
+            </select>
+          </div>
+
+          <!-- 가능 요일 및 각 요일별 가능 교시 수정 -->
+          <div class="form-group">
+            <label class="form-label">가능 요일 및 각 요일 별 가능 교시 <span class="req">*</span></label>
+            <div class="matrix-box" style="padding: 8px;">
+              <div class="matrix-row" data-day="월">
+                <div class="day-badge">월요일</div>
+                <div class="period-btn-group">
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '월', '1교시')">1교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '월', '2교시')">2교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '월', '3교시')">3교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '월', '4교시')">4교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '월', '5교시')">5교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '월', '6교시')">6교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '월', '7교시')">7교시</button>
+                </div>
+              </div>
+              <div class="matrix-row" data-day="화">
+                <div class="day-badge">화요일</div>
+                <div class="period-btn-group">
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '화', '1교시')">1교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '화', '2교시')">2교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '화', '3교시')">3교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '화', '4교시')">4교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '화', '5교시')">5교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '화', '6교시')">6교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '화', '7교시')">7교시</button>
+                </div>
+              </div>
+              <div class="matrix-row" data-day="수">
+                <div class="day-badge">수요일</div>
+                <div class="period-btn-group">
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '수', '1교시')">1교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '수', '2교시')">2교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '수', '3교시')">3교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '수', '4교시')">4교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '수', '5교시')">5교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '수', '6교시')">6교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '수', '7교시')">7교시</button>
+                </div>
+              </div>
+              <div class="matrix-row" data-day="목">
+                <div class="day-badge">목요일</div>
+                <div class="period-btn-group">
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '목', '1교시')">1교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '목', '2교시')">2교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '목', '3교시')">3교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '목', '4교시')">4교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '목', '5교시')">5교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '목', '6교시')">6교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '목', '7교시')">7교시</button>
+                </div>
+              </div>
+              <div class="matrix-row" data-day="금">
+                <div class="day-badge">금요일</div>
+                <div class="period-btn-group">
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '금', '1교시')">1교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '금', '2교시')">2교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '금', '3교시')">3교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '금', '4교시')">4교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '금', '5교시')">5교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '금', '6교시')">6교시</button>
+                  <button type="button" class="period-btn" onclick="toggleEditPeriod(this, '금', '7교시')">7교시</button>
+                </div>
+              </div>
+              <div class="preview-box" id="editSchedulePreviewText" style="min-height: 28px; font-size: 0.775rem;">
+                선택된 가능 요일 및 교시가 표시됩니다.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-bottom: 0;">
+            <div class="form-group">
+              <label class="form-label">내선번호</label>
+              <input type="text" id="editExtension" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">상태 변경</label>
+              <select id="editStatus" class="form-select">
+                <option value="OPEN">⚡ 대기중 (수업 대여 구함)</option>
+                <option value="MATCHED">✅ 매칭완료</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">비고/메모 (시험 범위 또는 진도 안내)</label>
+            <textarea id="editNotes" class="form-textarea" placeholder="시험 범위 또는 진도 안내"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalEditRequest')">닫기</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk"></i> 수정 내용 저장
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: 매칭 완료 처리 모달 -->
+  <div id="modalConfirmMatch" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <h3><i class="fa-solid fa-handshake"></i> 보강 매칭 완료 처리</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalConfirmMatch')">&times;</button>
+      </div>
+      <form id="confirmMatchForm" onsubmit="handleConfirmMatchSubmit(event)">
+        <input type="hidden" id="matchTargetId">
+        <div class="modal-body">
+          <div id="matchTargetSummary" style="background: var(--primary-light); border: 1px solid var(--primary-border); padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #005a56; line-height: 1.5;">
+            <!-- Target Summary -->
+          </div>
+
+          <p style="font-size: 0.825rem; color: var(--text-muted);">
+            수업을 빌려주신 선생님과 연락이 완료되었으면 아래 정보를 확인하고 [매칭 완료 확정]을 클릭해 주세요.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label">수업을 빌려주신 교사명</label>
+            <input type="text" id="matchLenderName" class="form-input" placeholder="예: 이도덕 선생님">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">확정된 보강 일시 및 교시 (선택)</label>
+            <input type="text" id="matchLendDate" class="form-input" placeholder="예: 10/2(수) 2교시">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalConfirmMatch')">닫기</button>
+          <button type="submit" class="btn btn-success">
+            <i class="fa-solid fa-check"></i> 매칭 완료 확정
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 토스트 컨테이너 -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    let appData = {
+      requests: [],
+      spreadsheetId: '',
+      spreadsheetUrl: ''
+    };
+
+    let currentStatusFilter = 'ALL';
+    let selectedClasses = ['2학년 3반']; // 복수 선택된 학급 목록 배열
+    let selectedDayPeriods = {};        // 등록용 스케줄 매트릭스
+    let editSelectedDayPeriods = {};    // 수정용 스케줄 매트릭스
+
+    // Mock initial data (학급당 1행 구조)
+    const MOCK_ROWS = [
+      {
+        id: 'REQ_SAMPLE_1',
+        createdAt: '2026-09-17 10:20',
+        targetClass: '2학년 3반',
+        subject: '수학',
+        teacherName: '김수학',
+        extensionNumber: '302',
+        totalHours: 3,
+        availableSchedule: '월(3, 5교시) | 수(2교시) | 금(4교시)',
+        status: 'OPEN',
+        matchedTeacher: '',
+        matchedDate: '',
+        notes: '중간고사 이차함수 시험범위 진도 완료용'
+      },
+      {
+        id: 'REQ_SAMPLE_2',
+        createdAt: '2026-09-17 10:20',
+        targetClass: '2학년 4반',
+        subject: '수학',
+        teacherName: '김수학',
+        extensionNumber: '302',
+        totalHours: 2,
+        availableSchedule: '월(3, 5교시) | 금(4교시)',
+        status: 'OPEN',
+        matchedTeacher: '',
+        matchedDate: '',
+        notes: '중간고사 이차함수 시험범위 진도 완료용'
+      },
+      {
+        id: 'REQ_SAMPLE_3',
+        createdAt: '2026-09-17 11:30',
+        targetClass: '1학년 2반',
+        subject: '영어',
+        teacherName: '박영어',
+        extensionNumber: '205',
+        totalHours: 1,
+        availableSchedule: '화(4교시) | 목(1, 3교시)',
+        status: 'MATCHED',
+        matchedTeacher: '이도덕',
+        matchedDate: '10/1(화) 4교시',
+        notes: '듣기평가 대비 수업 1차시'
+      },
+      {
+        id: 'REQ_SAMPLE_4',
+        createdAt: '2026-09-17 14:15',
+        targetClass: '3학년 1반',
+        subject: '통합사회',
+        teacherName: '최사회',
+        extensionNumber: '412',
+        totalHours: 2,
+        availableSchedule: '수(3, 4교시) | 금(2, 5교시)',
+        status: 'OPEN',
+        matchedTeacher: '',
+        matchedDate: '',
+        notes: '단원 정리 및 수행평가 피드백'
+      }
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderClassToggleButtons();
+      renderSelectedClasses();
+      fetchData();
+    });
+
+    function isGAS() {
+      return typeof google !== 'undefined' && google.script && google.script.run;
+    }
+
+    function fetchData(isManual = false) {
+      showLoading(true, '보강 매칭 데이터를 불러오는 중...');
+      const refreshIcon = document.getElementById('headerRefreshIcon');
+      if (refreshIcon) refreshIcon.classList.add('spin-animation');
+
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(res => {
+            showLoading(false);
+            if (refreshIcon) refreshIcon.classList.remove('spin-animation');
+            if (res && res.success) {
+              appData.requests = res.requests || [];
+              appData.spreadsheetId = res.spreadsheetId || '';
+              appData.spreadsheetUrl = res.spreadsheetUrl || '';
+              renderTable();
+              updateStats();
+              if (isManual) showToast('데이터가 최신 상태로 동기화되었습니다.');
+            } else {
+              showToast('조회 오류: ' + (res ? res.error : '알 수 없음'), 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            showLoading(false);
+            if (refreshIcon) refreshIcon.classList.remove('spin-animation');
+            showToast('통신 오류: ' + err.message, 'error');
+          })
+          .getInitialData();
+      } else {
+        setTimeout(() => {
+          showLoading(false);
+          if (refreshIcon) refreshIcon.classList.remove('spin-animation');
+          const cached = localStorage.getItem('class_match_classes');
+          if (cached) {
+            try { appData.requests = JSON.parse(cached); } catch(e) { appData.requests = [...MOCK_ROWS]; }
+          } else {
+            appData.requests = [...MOCK_ROWS];
+          }
+          appData.spreadsheetUrl = 'https://docs.google.com/spreadsheets/d/sample-id';
+          renderTable();
+          updateStats();
+          if (isManual) showToast('데이터가 새로고침되었습니다.');
+        }, 200);
+      }
+    }
+
+    function updateStats() {
+      const total = appData.requests.length;
+      const badge = document.getElementById('badgeTable');
+      if (badge) badge.innerText = `${total}개 학급`;
+
+      const urlInput = document.getElementById('settingSheetUrl');
+      const openBtn = document.getElementById('btnOpenSheet');
+      if (urlInput) urlInput.value = appData.spreadsheetUrl || '생성 대기 중';
+      if (openBtn && appData.spreadsheetUrl) openBtn.href = appData.spreadsheetUrl;
+    }
+
+    // 학급 다중 선택 버튼 UI 렌더링 (1반~15반)
+    function renderClassToggleButtons() {
+      const grade = document.getElementById('gradeSelectBox').value;
+      const container = document.getElementById('classChipsGroup');
+      let html = '';
+      for (let i = 1; i <= 15; i++) {
+        const classStr = `${grade} ${i}반`;
+        const isSel = selectedClasses.includes(classStr);
+        html += `
+          <button type="button" class="class-toggle-btn ${isSel ? 'selected' : ''}" onclick="toggleSelectClass('${classStr}', this)">
+            ${i}반
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    function toggleSelectClass(classStr, btn) {
+      const idx = selectedClasses.indexOf(classStr);
+      if (idx > -1) {
+        selectedClasses.splice(idx, 1);
+        btn.classList.remove('selected');
+      } else {
+        selectedClasses.push(classStr);
+        btn.classList.add('selected');
+      }
+      renderSelectedClasses();
+    }
+
+    function addAllClassesForGrade() {
+      const grade = document.getElementById('gradeSelectBox').value;
+      for (let i = 1; i <= 15; i++) {
+        const classStr = `${grade} ${i}반`;
+        if (!selectedClasses.includes(classStr)) {
+          selectedClasses.push(classStr);
+        }
+      }
+      renderClassToggleButtons();
+      renderSelectedClasses();
+    }
+
+    function clearSelectedClasses() {
+      selectedClasses = [];
+      renderClassToggleButtons();
+      renderSelectedClasses();
+    }
+
+    function removeSelectedClass(classStr) {
+      const idx = selectedClasses.indexOf(classStr);
+      if (idx > -1) {
+        selectedClasses.splice(idx, 1);
+        renderClassToggleButtons();
+        renderSelectedClasses();
+      }
+    }
+
+    function renderSelectedClasses() {
+      const listEl = document.getElementById('selectedClassesList');
+      if (selectedClasses.length === 0) {
+        listEl.innerHTML = '<span style="font-size: 0.8rem; color: #94a3b8;">위의 반 버튼을 클릭하여 희망 학급을 추가해 주세요. (여러 반 선택 가능)</span>';
+        return;
+      }
+      listEl.innerHTML = selectedClasses.map(c => `
+        <span class="selected-class-item">
+          <i class="fa-solid fa-chalkboard"></i> ${escapeHtml(c)}
+          <span class="remove-class-btn" onclick="removeSelectedClass('${escapeHtml(c)}')">&times;</span>
+        </span>
+      `).join('');
+    }
+
+    // 열 별 필터 적용
+    function applyColumnFilters() {
+      renderTable();
+    }
+
+    // 열 별 필터 초기화 (21-홍익_보강 지원 프로젝트 표준)
+    function resetColumnFilters(e) {
+      const btn = (e && e.currentTarget) ? e.currentTarget : document.getElementById('btnResetFilters');
+      const resetIcon = document.getElementById('resetIcon');
+
+      if (resetIcon) {
+        resetIcon.classList.remove('animate-spin-ccw');
+        void resetIcon.offsetWidth; // Reflow 트리거
+        resetIcon.classList.add('animate-spin-ccw');
+        setTimeout(() => resetIcon.classList.remove('animate-spin-ccw'), 600);
+      }
+
+      if (btn) {
+        btn.classList.remove('btn-clicked-pulse');
+        void btn.offsetWidth; // Reflow 트리거
+        btn.classList.add('btn-clicked-pulse');
+        setTimeout(() => btn.classList.remove('btn-clicked-pulse'), 350);
+      }
+
+      const fStatus = document.getElementById('filterColStatus');
+      if (fStatus) fStatus.value = '';
+      const fClass = document.getElementById('filterColClass');
+      if (fClass) fClass.value = '';
+      const fSubject = document.getElementById('filterColSubject');
+      if (fSubject) fSubject.value = '';
+      const fTeacher = document.getElementById('filterColTeacher');
+      if (fTeacher) fTeacher.value = '';
+      const fExt = document.getElementById('filterColExt');
+      if (fExt) fExt.value = '';
+      const fTotalHours = document.getElementById('filterColTotalHours');
+      if (fTotalHours) fTotalHours.value = '';
+      const fSchedule = document.getElementById('filterColSchedule');
+      if (fSchedule) fSchedule.value = '';
+      const fMatched = document.getElementById('filterColMatched');
+      if (fMatched) fMatched.value = '';
+      const fNotes = document.getElementById('filterColNotes');
+      if (fNotes) fNotes.value = '';
+
+      renderTable();
+      showToast('열 검색 필터가 초기화되었습니다.', 'info');
+    }
+
+    // 테이블 렌더링 (학급마다 1행으로 표시 & 열 별 필터링 수행)
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      if (!tbody) return;
+
+      const fStatus = (document.getElementById('filterColStatus')?.value || '').trim();
+      const fClass = (document.getElementById('filterColClass')?.value || '').trim();
+      const fSubject = (document.getElementById('filterColSubject')?.value || '').trim().toLowerCase();
+      const fTeacher = (document.getElementById('filterColTeacher')?.value || '').trim().toLowerCase();
+      const fExt = (document.getElementById('filterColExt')?.value || '').trim();
+      const fTotalHours = (document.getElementById('filterColTotalHours')?.value || '').trim();
+      const fSchedule = (document.getElementById('filterColSchedule')?.value || '').trim().toLowerCase();
+      const fMatched = (document.getElementById('filterColMatched')?.value || '').trim().toLowerCase();
+      const fNotes = (document.getElementById('filterColNotes')?.value || '').trim().toLowerCase();
+
+      const filtered = appData.requests.filter(row => {
+        // 1. 상태 필터
+        if (fStatus && row.status !== fStatus) return false;
+
+        // 2. 희망 학급 필터
+        if (fClass && !row.targetClass.includes(fClass)) return false;
+
+        // 3. 교과명 필터
+        if (fSubject && !(row.subject || '').toLowerCase().includes(fSubject)) return false;
+
+        // 4. 희망 교사 필터
+        if (fTeacher && !(row.teacherName || '').toLowerCase().includes(fTeacher)) return false;
+
+        // 5. 내선번호 필터
+        if (fExt && !(row.extensionNumber || '').includes(fExt)) return false;
+
+        // 6. 총 희망 차수 필터
+        if (fTotalHours && String(row.totalHours) !== fTotalHours) return false;
+
+        // 7. 가능 요일 및 교시 필터
+        if (fSchedule && !(row.availableSchedule || '').toLowerCase().includes(fSchedule)) return false;
+
+        // 8. 매칭 정보 필터 (대여교사 또는 대여일시)
+        if (fMatched) {
+          const matchedText = `${row.matchedTeacher || ''} ${row.matchedDate || ''}`.toLowerCase();
+          if (!matchedText.includes(fMatched)) return false;
+        }
+
+        // 9. 비고 / 메모 필터
+        if (fNotes && !(row.notes || '').toLowerCase().includes(fNotes)) return false;
+
+        return true;
+      });
+
+      // 뱃지 업데이트
+      const badge = document.getElementById('badgeTable');
+      if (badge) badge.innerText = `${filtered.length}개 학급`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+              <i class="fa-solid fa-inbox" style="font-size: 1.8rem; margin-bottom: 6px; display: block; color: #cbd5e1;"></i>
+              조건에 일치하는 보강 희망 내역이 없습니다.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(row => {
+        const isOpen = row.status === 'OPEN';
+        const statusBadge = isOpen
+          ? `<span class="badge-status-open"><i class="fa-solid fa-bolt"></i> 대기중</span>`
+          : `<span class="badge-status-matched"><i class="fa-solid fa-circle-check"></i> 매칭완료</span>`;
+
+        const scheduleChips = (row.availableSchedule || '')
+          .split(/[,|]/)
+          .map(s => s.trim())
+          .filter(Boolean)
+          .map(s => `<span class="sch-chip">${escapeHtml(s)}</span>`)
+          .join('');
+
+        const matchedInfo = (!isOpen && row.matchedTeacher)
+          ? `<div style="font-weight:700; color:#047857; font-size:0.825rem;"><i class="fa-solid fa-chalkboard-user"></i> ${escapeHtml(row.matchedTeacher)} 교사</div>
+             <div style="font-size:0.75rem; color:#64748b;">${escapeHtml(row.matchedDate || '')}</div>`
+          : `<span style="color:#cbd5e1;">-</span>`;
+
+        // 버튼 액션: [수정], [매칭완료/재대기], [복사]
+        let actionButtons = `
+          <div style="display:flex; gap:3px; justify-content:center;">
+            <button class="btn btn-outline btn-action-sm" onclick="openEditModal('${row.id}')" title="총 차수, 가능 요일/교시, 메모 수정">
+              <i class="fa-solid fa-pen-to-square" style="color: var(--primary-color);"></i> 수정
+            </button>
+            ${isOpen ? `
+              <button class="btn btn-success btn-action-sm" onclick="openConfirmMatchModal('${row.id}')" title="보강을 올렸던 교사가 클릭하여 매칭 완료를 알립니다">
+                <i class="fa-solid fa-handshake"></i> 매칭완료
+              </button>
+            ` : `
+              <button class="btn btn-outline btn-action-sm" onclick="handleCancelMatch('${row.id}')" title="매칭을 취소하고 다시 대기중으로 변경합니다" style="color:#b45309; border-color:#fde68a;">
+                <i class="fa-solid fa-rotate-left"></i> 재대기
+              </button>
+            `}
+            <button class="btn btn-outline btn-action-sm" onclick="copyMessengerText('${row.id}')" title="메신저 협의 텍스트 복사">
+              <i class="fa-regular fa-copy" style="color: var(--primary-color);"></i>
+            </button>
+          </div>
+        `;
+
+        return `
+          <tr>
+            <td>${statusBadge}</td>
+            <td><span class="badge-class">${escapeHtml(row.targetClass)}</span></td>
+            <td style="font-weight: 700; color: var(--primary-color);">${escapeHtml(row.subject)}</td>
+            <td style="font-weight: 600;">${escapeHtml(row.teacherName)}</td>
+            <td>
+              <span class="badge-ext" onclick="copyToClipboard('${escapeHtml(row.extensionNumber)}', '내선번호')" title="클릭하여 내선번호 복사">
+                <i class="fa-solid fa-phone"></i> ${escapeHtml(row.extensionNumber)}
+              </span>
+            </td>
+            <td><span class="badge-total-hours">${row.totalHours}차시</span></td>
+            <td><div class="sch-chips-wrap">${scheduleChips || '<span style="color:#94a3b8;">협의</span>'}</div></td>
+            <td>${matchedInfo}</td>
+            <td style="font-size:0.8rem; color:var(--text-muted); text-align:left; max-width:180px; word-break:break-all;">
+              ${escapeHtml(row.notes || '-')}
+            </td>
+            <td>${actionButtons}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 스마트 스케줄 매트릭스 토글 (등록용)
+    function togglePeriod(btn, day, period) {
+      btn.classList.toggle('selected');
+      if (!selectedDayPeriods[day]) selectedDayPeriods[day] = [];
+
+      const idx = selectedDayPeriods[day].indexOf(period);
+      if (idx > -1) {
+        selectedDayPeriods[day].splice(idx, 1);
+        if (selectedDayPeriods[day].length === 0) delete selectedDayPeriods[day];
+      } else {
+        selectedDayPeriods[day].push(period);
+        selectedDayPeriods[day].sort();
+      }
+      updateSchedulePreview('schedulePreviewText', selectedDayPeriods);
+    }
+
+    // 스마트 스케줄 매트릭스 토글 (수정용)
+    function toggleEditPeriod(btn, day, period) {
+      btn.classList.toggle('selected');
+      if (!editSelectedDayPeriods[day]) editSelectedDayPeriods[day] = [];
+
+      const idx = editSelectedDayPeriods[day].indexOf(period);
+      if (idx > -1) {
+        editSelectedDayPeriods[day].splice(idx, 1);
+        if (editSelectedDayPeriods[day].length === 0) delete editSelectedDayPeriods[day];
+      } else {
+        editSelectedDayPeriods[day].push(period);
+        editSelectedDayPeriods[day].sort();
+      }
+      updateSchedulePreview('editSchedulePreviewText', editSelectedDayPeriods);
+    }
+
+    function updateSchedulePreview(elementId, scheduleMap) {
+      const days = ['월', '화', '수', '목', '금'];
+      const parts = [];
+      days.forEach(d => {
+        if (scheduleMap[d] && scheduleMap[d].length > 0) {
+          parts.push(`${d}(${scheduleMap[d].join(', ')})`);
+        }
+      });
+
+      const previewEl = document.getElementById(elementId);
+      if (parts.length === 0) {
+        previewEl.innerText = '선택된 가능 요일 및 교시가 여기에 자동 포맷팅됩니다. (예: 월(3, 5교시) | 수(2교시) | 금(4교시))';
+        previewEl.style.color = '#94a3b8';
+      } else {
+        previewEl.innerText = parts.join(' | ');
+        previewEl.style.color = 'var(--primary-color)';
+      }
+    }
+
+    function getFormattedScheduleFromMap(scheduleMap) {
+      const days = ['월', '화', '수', '목', '금'];
+      const parts = [];
+      days.forEach(d => {
+        if (scheduleMap[d] && scheduleMap[d].length > 0) {
+          parts.push(`${d}(${scheduleMap[d].join(', ')})`);
+        }
+      });
+      return parts.join(' | ');
+    }
+
+    // 등록 처리: 선택된 학급마다 1행씩 등록
+    function handleCreateRequest(e) {
+      e.preventDefault();
+
+      if (selectedClasses.length === 0) {
+        showToast('희망 학급을 최소 1개 이상 선택해 주세요.', 'warning');
+        return;
+      }
+
+      const scheduleStr = getFormattedScheduleFromMap(selectedDayPeriods);
+      if (!scheduleStr) {
+        showToast('가능 요일 및 교시를 최소 1개 이상 선택해 주세요.', 'warning');
+        return;
+      }
+
+      const requestData = {
+        classes: [...selectedClasses],
+        subject: document.getElementById('formSubject').value.trim(),
+        teacherName: document.getElementById('formTeacherName').value.trim(),
+        extensionNumber: document.getElementById('formExtension').value.trim(),
+        totalHours: Number(document.getElementById('formTotalHours').value) || 1,
+        availableSchedule: scheduleStr,
+        notes: document.getElementById('formNotes').value.trim()
+      };
+
+      showLoading(true, `총 ${requestData.classes.length}개 학급의 보강 희망을 등록하는 중...`);
+
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(res => {
+            showLoading(false);
+            if (res && res.success) {
+              showToast(`총 ${requestData.classes.length}개 학급의 보강 희망이 등록되었습니다!`);
+              resetRequestForm();
+              closeModal('modalCreateRequest');
+              fetchData();
+            } else {
+              showToast('등록 오류: ' + (res ? res.error : '알 수 없음'), 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            showLoading(false);
+            showToast('서버 오류: ' + err.message, 'error');
+          })
+          .createRequest(requestData);
+      } else {
+        setTimeout(() => {
+          showLoading(false);
+          const baseId = 'REQ_' + Date.now();
+          const d = new Date();
+          const nowStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+          requestData.classes.forEach((cls, idx) => {
+            appData.requests.unshift({
+              id: `${baseId}_${idx + 1}`,
+              createdAt: nowStr,
+              targetClass: cls,
+              subject: requestData.subject,
+              teacherName: requestData.teacherName,
+              extensionNumber: requestData.extensionNumber,
+              totalHours: requestData.totalHours,
+              availableSchedule: requestData.availableSchedule,
+              status: 'OPEN',
+              matchedTeacher: '',
+              matchedDate: '',
+              notes: requestData.notes
+            });
+          });
+          localStorage.setItem('class_match_classes', JSON.stringify(appData.requests));
+          showToast(`총 ${requestData.classes.length}개 학급의 보강 희망이 등록되었습니다!`);
+          resetRequestForm();
+          closeModal('modalCreateRequest');
+          renderTable();
+          updateStats();
+        }, 300);
+      }
+    }
+
+    function resetRequestForm() {
+      document.getElementById('requestForm').reset();
+      selectedClasses = ['2학년 3반'];
+      renderClassToggleButtons();
+      renderSelectedClasses();
+      selectedDayPeriods = {};
+      document.querySelectorAll('#modalCreateRequest .period-btn').forEach(b => b.classList.remove('selected'));
+      updateSchedulePreview('schedulePreviewText', selectedDayPeriods);
+    }
+
+    // 수정 모달 열기 (총 차수, 가능 요일/교시, 내선, 메모 로딩)
+    function openEditModal(rowId) {
+      const row = appData.requests.find(r => r.id === rowId);
+      if (!row) return;
+
+      document.getElementById('editRequestId').value = rowId;
+      document.getElementById('editTargetSummary').innerHTML = `
+        <strong><i class="fa-solid fa-chalkboard"></i> 학급:</strong> ${escapeHtml(row.targetClass)} | 
+        <strong>과목:</strong> ${escapeHtml(row.subject)} (${escapeHtml(row.teacherName)} 선생님)
+      `;
+
+      document.getElementById('editTotalHours').value = String(row.totalHours || 1);
+      document.getElementById('editExtension').value = row.extensionNumber || '';
+      document.getElementById('editStatus').value = row.status || 'OPEN';
+      document.getElementById('editNotes').value = row.notes || '';
+
+      // 스케줄 매트릭스 파싱 및 동기화
+      editSelectedDayPeriods = {};
+      document.querySelectorAll('#modalEditRequest .period-btn').forEach(b => b.classList.remove('selected'));
+
+      const scheduleStr = row.availableSchedule || '';
+      // 파싱 예: "월(3, 5교시) | 수(2교시)"
+      const parts = scheduleStr.split('|');
+      parts.forEach(p => {
+        const match = p.trim().match(/^([월화수목금])\((.*?)\)/);
+        if (match) {
+          const day = match[1];
+          const periodList = match[2].split(',').map(s => s.trim()).filter(Boolean);
+          editSelectedDayPeriods[day] = periodList;
+        }
+      });
+
+      // 버튼 활성화 처리
+      const editButtons = document.querySelectorAll('#modalEditRequest .matrix-row');
+      editButtons.forEach(rowEl => {
+        const day = rowEl.getAttribute('data-day');
+        if (editSelectedDayPeriods[day]) {
+          const btns = rowEl.querySelectorAll('.period-btn');
+          btns.forEach(btn => {
+            const pText = btn.innerText.trim();
+            if (editSelectedDayPeriods[day].includes(pText)) {
+              btn.classList.add('selected');
+            }
+          });
+        }
+      });
+
+      updateSchedulePreview('editSchedulePreviewText', editSelectedDayPeriods);
+      openModal('modalEditRequest');
+    }
+
+    // 수정 내용 저장 처리
+    function handleEditFormSubmit(e) {
+      e.preventDefault();
+      const rowId = document.getElementById('editRequestId').value;
+      const scheduleStr = getFormattedScheduleFromMap(editSelectedDayPeriods);
+
+      if (!scheduleStr) {
+        showToast('가능 요일 및 교시를 최소 1개 이상 선택해 주세요.', 'warning');
+        return;
+      }
+
+      const updateData = {
+        requestId: rowId,
+        totalHours: Number(document.getElementById('editTotalHours').value) || 1,
+        availableSchedule: scheduleStr,
+        extensionNumber: document.getElementById('editExtension').value.trim(),
+        status: document.getElementById('editStatus').value,
+        notes: document.getElementById('editNotes').value.trim()
+      };
+
+      showLoading(true, '수정 내용을 저장하는 중...');
+
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(res => {
+            showLoading(false);
+            if (res && res.success) {
+              closeModal('modalEditRequest');
+              showToast('보강 희망 내용이 성공적으로 수정되었습니다!');
+              fetchData();
+            } else {
+              showToast('수정 실패: ' + (res ? res.error : '알 수 없음'), 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            showLoading(false);
+            showToast('서버 오류: ' + err.message, 'error');
+          })
+          .updateRequest(updateData);
+      } else {
+        setTimeout(() => {
+          showLoading(false);
+          const target = appData.requests.find(r => r.id === rowId);
+          if (target) {
+            target.totalHours = updateData.totalHours;
+            target.availableSchedule = updateData.availableSchedule;
+            target.extensionNumber = updateData.extensionNumber;
+            target.status = updateData.status;
+            target.notes = updateData.notes;
+            localStorage.setItem('class_match_classes', JSON.stringify(appData.requests));
+          }
+          closeModal('modalEditRequest');
+          showToast('보강 희망 내용이 성공적으로 수정되었습니다!');
+          renderTable();
+          updateStats();
+        }, 200);
+      }
+    }
+
+    // 매칭 완료 모달 열기
+    function openConfirmMatchModal(rowId) {
+      const row = appData.requests.find(r => r.id === rowId);
+      if (!row) return;
+
+      document.getElementById('matchTargetId').value = rowId;
+      document.getElementById('matchTargetSummary').innerHTML = `
+        <strong><i class="fa-solid fa-chalkboard"></i> 학급:</strong> ${escapeHtml(row.targetClass)} | 
+        <strong>과목:</strong> ${escapeHtml(row.subject)} (${escapeHtml(row.teacherName)} 선생님)<br>
+        <strong>총 희망 차수:</strong> ${row.totalHours}차시 | 
+        <strong>가능 요일/교시:</strong> ${escapeHtml(row.availableSchedule)}
+      `;
+
+      document.getElementById('matchLenderName').value = '';
+      document.getElementById('matchLendDate').value = '';
+
+      openModal('modalConfirmMatch');
+    }
+
+    // 매칭 완료 확정 제출
+    function handleConfirmMatchSubmit(e) {
+      e.preventDefault();
+      const rowId = document.getElementById('matchTargetId').value;
+      const data = {
+        requestId: rowId,
+        matchedTeacher: document.getElementById('matchLenderName').value.trim(),
+        matchedDate: document.getElementById('matchLendDate').value.trim()
+      };
+
+      showLoading(true, '매칭 완료 처리 중...');
+
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(res => {
+            showLoading(false);
+            if (res && res.success) {
+              closeModal('modalConfirmMatch');
+              showToast('매칭 완료 처리가 등록되었습니다!');
+              fetchData();
+            } else {
+              showToast('처리 실패: ' + (res ? res.error : '알 수 없음'), 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            showLoading(false);
+            showToast('서버 오류: ' + err.message, 'error');
+          })
+          .confirmMatch(data);
+      } else {
+        setTimeout(() => {
+          showLoading(false);
+          const target = appData.requests.find(r => r.id === rowId);
+          if (target) {
+            target.status = 'MATCHED';
+            target.matchedTeacher = data.matchedTeacher || '동료교사';
+            target.matchedDate = data.matchedDate;
+            localStorage.setItem('class_match_classes', JSON.stringify(appData.requests));
+          }
+          closeModal('modalConfirmMatch');
+          showToast('매칭 완료 처리가 등록되었습니다!');
+          renderTable();
+          updateStats();
+        }, 200);
+      }
+    }
+
+    // 매칭 취소 (재대기 처리)
+    function handleCancelMatch(rowId) {
+      if (!confirm('이 학급의 보강 매칭을 취소하고 다시 [대기중] 상태로 변경하시겠습니까?')) {
+        return;
+      }
+
+      showLoading(true, '대기중 상태로 변경하는 중...');
+
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(res => {
+            showLoading(false);
+            if (res && res.success) {
+              showToast('다시 [대기중] 상태로 변경되었습니다.');
+              fetchData();
+            } else {
+              showToast('오류: ' + (res ? res.error : '알 수 없음'), 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            showLoading(false);
+            showToast('서버 오류: ' + err.message, 'error');
+          })
+          .cancelMatch(rowId);
+      } else {
+        setTimeout(() => {
+          showLoading(false);
+          const target = appData.requests.find(r => r.id === rowId);
+          if (target) {
+            target.status = 'OPEN';
+            target.matchedTeacher = '';
+            target.matchedDate = '';
+            localStorage.setItem('class_match_classes', JSON.stringify(appData.requests));
+          }
+          showToast('다시 [대기중] 상태로 변경되었습니다.');
+          renderTable();
+          updateStats();
+        }, 200);
+      }
+    }
+
+    // 메신저 협의 텍스트 복사
+    function copyMessengerText(rowId) {
+      const row = appData.requests.find(r => r.id === rowId);
+      if (!row) return;
+
+      const text = `[Class Match 보강 협의 희망]
+- 대상 학급: ${row.targetClass}
+- 교과명: ${row.subject} (${row.teacherName} 선생님)
+- 내선번호: ${row.extensionNumber}
+- 총 희망 차수: ${row.totalHours}차시
+- 가능 요일/교시: ${row.availableSchedule}
+${row.notes ? `- 메모: ${row.notes}\n` : ''}
+해당 학급에 수업이 있으시거나 수업 대여/교환이 가능하신 선생님께서는 내선(${row.extensionNumber})으로 연락 부탁드립니다!`;
+
+      copyToClipboard(text, '메신저 협의 텍스트');
+    }
+
+    function copyToClipboard(text, label = '텍스트') {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`${label}가 클립보드에 복사되었습니다!`);
+        }).catch(() => fallbackCopy(text, label));
+      } else {
+        fallbackCopy(text, label);
+      }
+    }
+
+    function fallbackCopy(text, label) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast(`${label}가 복사되었습니다!`);
+    }
+
+    // 스프레드시트 설정 변경
+    function handleUpdateSheetId() {
+      const val = document.getElementById('settingNewSheetId').value.trim();
+      if (!val) {
+        showToast('스프레드시트 ID 또는 URL을 입력해 주세요.', 'warning');
+        return;
+      }
+
+      showLoading(true, '새 스프레드시트와 연결하는 중...');
+
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(res => {
+            showLoading(false);
+            if (res && res.success) {
+              showToast('스프레드시트가 성공적으로 변경되었습니다!');
+              document.getElementById('settingNewSheetId').value = '';
+              fetchData();
+            } else {
+              showToast('변경 실패: ' + (res ? res.error : '알 수 없음'), 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            showLoading(false);
+            showToast('서버 오류: ' + err.message, 'error');
+          })
+          .setSpreadsheetId(val);
+      } else {
+        setTimeout(() => {
+          showLoading(false);
+          showToast('스프레드시트 설정이 변경되었습니다 (로컬 시뮬레이션).');
+        }, 200);
+      }
+    }
+
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.classList.add('show');
+    }
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.classList.remove('show');
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      const icon = type === 'error' ? '<i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i>' 
+                 : type === 'warning' ? '<i class="fa-solid fa-bolt" style="color:#f59e0b;"></i>' 
+                 : '<i class="fa-solid fa-circle-check" style="color:#10b981;"></i>';
+      toast.innerHTML = `${icon} <span>${escapeHtml(msg)}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(6px)';
+        toast.style.transition = 'all 0.2s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, 3000);
+    }
+
+    function showLoading(show, text = '동기화 중...') {
+      const overlay = document.getElementById('loadingOverlay');
+      const txt = document.getElementById('loadingText');
+      if (txt && text) txt.innerText = text;
+      if (show) overlay.classList.add('show');
+      else overlay.classList.remove('show');
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
