@@ -10,17 +10,44 @@
  */
 function doGet(e) {
   let template;
-  try {
-    template = HtmlService.createTemplateFromFile('Index');
-  } catch (err1) {
+  // 구글 앱스크립트 편집기 파일명 대소문자 및 확장자 포함 여부 유연 탐색
+  const candidateNames = ['Index', 'index', 'Index.html', 'index.html', 'INDEX', 'INDEX.html', 'main', 'Main'];
+  for (let i = 0; i < candidateNames.length; i++) {
     try {
-      template = HtmlService.createTemplateFromFile('index');
-    } catch (err2) {
-      throw new Error(
-        "HTML 파일을 찾을 수 없습니다. (오류: " + err1.message + ")\n" +
-        "Google Apps Script 편집기 좌측 [파일 추가 (+)] -> [HTML] 생성 시 파일명을 'Index' 또는 'index'로 지정했는지 확인해 주세요."
-      );
+      template = HtmlService.createTemplateFromFile(candidateNames[i]);
+      if (template) break;
+    } catch (err) {
+      // 다음 후보 시도
     }
+  }
+
+  if (!template) {
+    const errorHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 2.5rem; max-width: 680px; margin: 40px auto; border: 1px solid #fecdd3; background: #fff1f2; border-radius: 12px; color: #9f1239; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
+        <h2 style="margin-top: 0; color: #be123c; font-size: 1.4rem;">
+          ⚠️ 'Index' HTML 파일을 찾을 수 없습니다
+        </h2>
+        <p style="font-size: 0.95rem; line-height: 1.7; color: #374151;">
+          Google Apps Script 프로젝트 내에 <strong>Index.html</strong> 파일이 생성되어 있지 않거나, 파일명이 다르게 지정되었습니다.
+        </p>
+        <div style="background: #ffffff; padding: 1.25rem 1.5rem; border-radius: 8px; border: 1px solid #fda4af; margin: 1.25rem 0;">
+          <h4 style="margin: 0 0 10px 0; color: #881337; font-size: 1rem;">💡 해결 방법 (30초 소요)</h4>
+          <ol style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.8; color: #475569;">
+            <li>Google Apps Script 편집기 좌측 [파일] 메뉴 옆의 <strong>[+]</strong> 아이콘을 클릭합니다.</li>
+            <li><strong>[HTML]</strong>을 선택합니다. (※ '스크립트'가 아닌 'HTML' 선택)</li>
+            <li>파일명 입력창에 확장자 없이 <strong>Index</strong> 만 입력하고 Enter를 누릅니다.</li>
+            <li>생성된 파일에 <strong>Index.html</strong> 코드 전체를 복사하여 붙여넣고 <strong>저장 (Ctrl + S)</strong>합니다.</li>
+            <li>우측 상단 <strong>[배포] ➔ [배포 관리] ➔ [수정(연필 아이콘)] ➔ [새 버전]</strong> 선택 후 배포합니다.</li>
+          </ol>
+        </div>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0;">
+          ※ 상단 [실행] 버튼으로 테스트하는 대신, 웹 앱 배포 URL로 직접 접속하시면 화면이 정상 표출됩니다.
+        </p>
+      </div>
+    `;
+    return HtmlService.createHtmlOutput(errorHtml)
+      .setTitle('Class Match - 파일 설정 안내')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
   }
 
   // 🚀 초고속 렌더링 최적화: 서버 사이드에서 초기 데이터를 미리 로드하여 템플릿에 직접 주입

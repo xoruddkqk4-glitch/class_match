@@ -558,6 +558,12 @@
       user-select: none;
       vertical-align: middle;
       text-align: left;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .mini-matrix:hover {
+      border-color: var(--primary-color);
+      box-shadow: 0 2px 6px rgba(0, 107, 103, 0.15);
     }
 
     .mm-head, .mm-row {
@@ -582,6 +588,7 @@
       color: #94a3b8;
       text-align: center;
       line-height: 1;
+      transition: color 0.15s ease;
     }
 
     .mm-col-hdr.active-day {
@@ -602,6 +609,14 @@
       align-items: center;
       justify-content: center;
       transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .mm-cell:hover {
+      background-color: var(--primary-light);
+      color: var(--primary-color);
+      transform: scale(1.2);
+      border-radius: 3px;
     }
 
     .mm-cell.active {
@@ -609,11 +624,12 @@
       color: #ffffff;
       font-weight: 800;
       box-shadow: 0 1px 2px rgba(0, 107, 103, 0.25);
-      cursor: default;
+      cursor: pointer;
     }
 
     .mm-cell.active:hover {
       background-color: var(--primary-hover);
+      filter: brightness(0.92);
       transform: scale(1.2);
     }
 
@@ -1842,7 +1858,7 @@
               </div>
             </td>
             <td>${getDeadlineBadge(row.deadline)}</td>
-            <td style="width: 200px;">${renderMiniScheduleMatrix(row.availableSchedule)}</td>
+            <td style="width: 200px;">${renderMiniScheduleMatrix(row.availableSchedule, row.id)}</td>
             <td style="width: 180px; font-size:0.8rem; color:var(--text-muted); text-align:left; word-break:break-all;">
               ${escapeHtml(row.notes || '-')}
             </td>
@@ -1853,33 +1869,30 @@
     }
 
     // 7행 x 5열 미니 스케줄 매트릭스 렌더러 (열: 월화수목금, 행: 1~7교시)
-    function renderMiniScheduleMatrix(scheduleStr) {
-      if (!scheduleStr || !scheduleStr.trim()) {
-        return '<span style="color:#94a3b8; font-size:0.8rem;">협의</span>';
-      }
-
+    // rowId가 전달되면 마우스 클릭을 통해 실시간으로 요일/교시를 토글할 수 있습니다.
+    function renderMiniScheduleMatrix(scheduleStr, rowId) {
       const days = ['월', '화', '수', '목', '금'];
       const dayMap = { '월': [], '화': [], '수': [], '목': [], '금': [] };
       let matchCount = 0;
 
-      // 파싱: "월(3, 5교시) | 금(4교시)" 또는 "월(3 5교시) 금(4교시)"
-      const regex = /([월화수목금])\s*\((.*?)\)/g;
-      let m;
-      while ((m = regex.exec(scheduleStr)) !== null) {
-        const day = m[1];
-        const digits = (m[2].match(/\d+/g) || []).map(Number);
-        if (digits.length > 0) {
-          dayMap[day] = digits;
-          matchCount += digits.length;
+      if (scheduleStr && scheduleStr.trim() && scheduleStr.trim() !== '협의') {
+        const regex = /([월화수목금])\s*\((.*?)\)/g;
+        let m;
+        while ((m = regex.exec(scheduleStr)) !== null) {
+          const day = m[1];
+          const digits = (m[2].match(/\d+/g) || []).map(Number);
+          if (digits.length > 0 && dayMap[day]) {
+            dayMap[day] = digits;
+            matchCount += digits.length;
+          }
         }
       }
 
-      // 파싱 가능한 교시 정보가 없으면 기본 텍스트 표시
-      if (matchCount === 0) {
-        return `<span style="font-size:0.8rem; color:var(--text-muted);">${escapeHtml(scheduleStr)}</span>`;
-      }
+      const tooltip = matchCount > 0 
+        ? `${escapeHtml(scheduleStr)} (클릭하여 요일/교시 실시간 수정)` 
+        : '가능 시간 협의 (셀을 클릭하여 요일/교시를 바로 추가할 수 있습니다)';
 
-      let html = `<div class="mini-matrix" title="${escapeHtml(scheduleStr)}">`;
+      let html = `<div class="mini-matrix" title="${tooltip}">`;
 
       // 1. 상단 헤더 행: 월, 화, 수, 목, 금
       html += '<div class="mm-head"><span class="mm-lbl"></span>';
@@ -1895,17 +1908,107 @@
         html += `<span class="mm-lbl">${p}</span>`;
         days.forEach(d => {
           const isActive = dayMap[d].includes(p);
+          const clickHandler = rowId ? `onclick="toggleScheduleCell('${rowId}', '${d}', ${p}, event)"` : '';
+          const cellTitle = isActive ? `${d}요일 ${p}교시 제외하기 (클릭 시 제거)` : `${d}요일 ${p}교시 추가하기 (클릭 시 추가)`;
           if (isActive) {
-            html += `<span class="mm-cell active" title="${d}요일 ${p}교시 가능">${p}</span>`;
+            html += `<span class="mm-cell active" ${clickHandler} title="${cellTitle}">${p}</span>`;
           } else {
-            html += `<span class="mm-cell">·</span>`;
+            html += `<span class="mm-cell" ${clickHandler} title="${cellTitle}">·</span>`;
           }
         });
         html += '</div>';
       }
 
+      if (matchCount === 0) {
+        html += '<div style="text-align:center; font-size:0.6rem; color:#94a3b8; font-weight:600; padding-top:1px;">협의 (클릭입력)</div>';
+      }
+
       html += '</div>';
       return html;
+    }
+
+    // 미니 시간표 셀 클릭 기반 실시간 요일/교시 토글 및 즉각 동기화
+    function toggleScheduleCell(rowId, day, period, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+
+      const row = appData.requests.find(r => r.id === rowId);
+      if (!row) return;
+
+      const days = ['월', '화', '수', '목', '금'];
+      const dayMap = { '월': [], '화': [], '수': [], '목': [], '금': [] };
+
+      // 1. 기존 스케줄 파싱
+      const currentSchedule = row.availableSchedule || '';
+      if (currentSchedule.trim() && currentSchedule.trim() !== '협의') {
+        const regex = /([월화수목금])\s*\((.*?)\)/g;
+        let m;
+        while ((m = regex.exec(currentSchedule)) !== null) {
+          const d = m[1];
+          const digits = (m[2].match(/\d+/g) || []).map(Number);
+          if (digits.length > 0 && dayMap[d]) {
+            dayMap[d] = digits;
+          }
+        }
+      }
+
+      // 2. 클릭한 교시 토글 (추가 또는 제거)
+      const pNum = Number(period);
+      if (!dayMap[day]) dayMap[day] = [];
+      const idx = dayMap[day].indexOf(pNum);
+      let isAdded = false;
+
+      if (idx > -1) {
+        dayMap[day].splice(idx, 1);
+        if (dayMap[day].length === 0) delete dayMap[day];
+        isAdded = false;
+      } else {
+        dayMap[day].push(pNum);
+        dayMap[day].sort((a, b) => a - b);
+        isAdded = true;
+      }
+
+      // 3. 새 스케줄 문자열 생성 (표준 'N교시' 포맷)
+      const parts = [];
+      days.forEach(d => {
+        if (dayMap[d] && dayMap[d].length > 0) {
+          parts.push(`${d}(${dayMap[d].map(p => p + '교시').join(', ')})`);
+        }
+      });
+
+      const newSchedule = parts.length > 0 ? parts.join(' | ') : '협의';
+      const oldSchedule = row.availableSchedule;
+
+      // 4. 낙관적 UI 즉각 반영 (0.01초 체감)
+      row.availableSchedule = newSchedule;
+      renderTable();
+
+      const actionText = isAdded ? `${day}요일 ${pNum}교시 추가` : `${day}요일 ${pNum}교시 제외`;
+
+      // 5. 백엔드 실시간 동기화
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.success) {
+              showToast(`[${row.targetClass}] ${actionText} 완료`, 'info');
+            } else {
+              row.availableSchedule = oldSchedule; // 실패 시 원복
+              renderTable();
+              showToast('시간표 저장 실패: ' + (res ? res.error : '알 수 없음'), 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            row.availableSchedule = oldSchedule; // 오류 시 원복
+            renderTable();
+            showToast('서버 오류: ' + err.message, 'error');
+          })
+          .updateRequest({ requestId: rowId, availableSchedule: newSchedule });
+      } else {
+        localStorage.setItem('class_match_classes', JSON.stringify(appData.requests));
+        showToast(`[${row.targetClass}] ${actionText} 완료`, 'info');
+      }
     }
 
     // 총 희망 차수 인라인 +/- 즉시 증감 제어 (최소 1차시 ~ 최대 10차시)
@@ -1955,7 +2058,7 @@
         if (selectedDayPeriods[day].length === 0) delete selectedDayPeriods[day];
       } else {
         selectedDayPeriods[day].push(period);
-        selectedDayPeriods[day].sort();
+        selectedDayPeriods[day].sort((a, b) => parseInt(a) - parseInt(b));
       }
       updateSchedulePreview('schedulePreviewText', selectedDayPeriods);
     }
@@ -1971,7 +2074,7 @@
         if (editSelectedDayPeriods[day].length === 0) delete editSelectedDayPeriods[day];
       } else {
         editSelectedDayPeriods[day].push(period);
-        editSelectedDayPeriods[day].sort();
+        editSelectedDayPeriods[day].sort((a, b) => parseInt(a) - parseInt(b));
       }
       updateSchedulePreview('editSchedulePreviewText', editSelectedDayPeriods);
     }
@@ -2120,21 +2223,21 @@
       document.getElementById('editStatus').value = row.status || 'OPEN';
       document.getElementById('editNotes').value = row.notes || '';
 
-      // 스케줄 매트릭스 파싱 및 동기화
+      // 스케줄 매트릭스 파싱 및 동기화 (숫자 및 'N교시' 완벽 호환 파싱)
       editSelectedDayPeriods = {};
       document.querySelectorAll('#modalEditRequest .period-btn').forEach(b => b.classList.remove('selected'));
 
       const scheduleStr = row.availableSchedule || '';
-      // 파싱 예: "월(3, 5교시) | 수(2교시)"
-      const parts = scheduleStr.split('|');
-      parts.forEach(p => {
-        const match = p.trim().match(/^([월화수목금])\((.*?)\)/);
-        if (match) {
-          const day = match[1];
-          const periodList = match[2].split(',').map(s => s.trim()).filter(Boolean);
-          editSelectedDayPeriods[day] = periodList;
+      const regex = /([월화수목금])\s*\((.*?)\)/g;
+      let m;
+      while ((m = regex.exec(scheduleStr)) !== null) {
+        const day = m[1];
+        const digits = (m[2].match(/\d+/g) || []).map(Number);
+        if (digits.length > 0) {
+          digits.sort((a, b) => a - b);
+          editSelectedDayPeriods[day] = digits.map(d => `${d}교시`);
         }
-      });
+      }
 
       // 버튼 활성화 처리
       const editButtons = document.querySelectorAll('#modalEditRequest .matrix-row');
