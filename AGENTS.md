@@ -11,6 +11,7 @@
 - Runs fast type checking or linting depending on the project setup:
   - TypeScript project: Run `npx tsc --noEmit` (or `npm run type-check`)
   - Next.js / React project: Run `npm run lint`
+  - GAS / Vanilla Web project (현재 프로젝트): Node.js `vm.Script` 기반 `Code.gs` 및 `Index.html` 스크립트 구문 검사
 - If non-critical lint warnings occur, do not get stuck in an endless fixing loop; report them briefly and conclude.
 - Do NOT run heavy dev servers, build commands (`npm run build`), or long-running test suites unless explicitly requested.
 

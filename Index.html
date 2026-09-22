@@ -1037,7 +1037,7 @@
 
         <div class="header-controls-right">
           <button type="button" class="btn btn-primary btn-sm" onclick="openModal('modalCreateRequest')">
-            <i class="fa-solid fa-plus"></i> 보강 희망 등록
+            <i class="fa-solid fa-plus"></i> 희망 보강 학급 등록
           </button>
           <button type="button" class="btn btn-outline btn-sm" onclick="fetchData(true)" title="데이터 새로고침">
             <i class="fa-solid fa-arrows-rotate" id="tableRefreshIcon"></i>
@@ -1070,11 +1070,11 @@
     </main>
   </div>
 
-  <!-- MODAL: 보강 희망 등록 (복수 학급 선택 지원) -->
+  <!-- MODAL: 희망 보강 학급 등록 (복수 학급 선택 지원) -->
   <div id="modalCreateRequest" class="modal-overlay">
     <div class="modal-dialog" style="max-width: 780px;">
       <div class="modal-head">
-        <h3><i class="fa-solid fa-clipboard-question"></i> 보강 희망 등록</h3>
+        <h3><i class="fa-solid fa-clipboard-question"></i> 희망 보강 학급 등록</h3>
         <button class="modal-close-btn" onclick="closeModal('modalCreateRequest')">&times;</button>
       </div>
       <form id="requestForm" onsubmit="handleCreateRequest(event)">
@@ -1247,7 +1247,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-outline" onclick="closeModal('modalCreateRequest')">닫기</button>
           <button type="submit" class="btn btn-primary">
-            <i class="fa-solid fa-check"></i> 보강 희망 등록하기
+            <i class="fa-solid fa-check"></i> 희망 보강 학급 등록하기
           </button>
         </div>
       </form>
@@ -1796,7 +1796,7 @@
           <tr>
             <td colspan="9" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
               <i class="fa-solid fa-inbox" style="font-size: 1.8rem; margin-bottom: 6px; display: block; color: #cbd5e1;"></i>
-              현재 대기 중인 보강 희망 학급이 없습니다. 상단의 [+ 보강 희망 등록]을 진행해 보세요.
+              현재 대기 중인 보강 희망 학급이 없습니다. 상단의 [+ 희망 보강 학급 등록]을 진행해 보세요.
             </td>
           </tr>
         `;
